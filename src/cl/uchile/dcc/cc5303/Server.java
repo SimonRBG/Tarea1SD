@@ -8,6 +8,7 @@ package cl.uchile.dcc.cc5303;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 
 public class Server {
     public static final String URL_SERVER = "rmi://localhost:1099/zatackaServer";
@@ -17,6 +18,9 @@ public class Server {
         IPoints points;
 
         try{
+            // Line to solve rmiregistry Bug
+            LocateRegistry.createRegistry(1100);
+
             points = new Points();
             Naming.rebind(URL_SERVER, points);
             System.out.println("Objeto points publicado en: " + URL_SERVER);

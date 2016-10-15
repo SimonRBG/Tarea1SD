@@ -1,14 +1,18 @@
 package cl.uchile.dcc.cc5303;
 
 import java.awt.*;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Player {
 
     public int angle;
     public ArrayList<Point> body;
+    public boolean ended;
 
     public Player(Point point) {
+        this.ended = false;
         this.body = new ArrayList<Point>();
         this.body.add(point);
     }
@@ -27,15 +31,19 @@ public class Player {
         this.angle = (this.angle - 10) % 360;
     }
 
-    public void growUp(boolean visibility) {
+    public void growUp(boolean visibility) throws RemoteException {
         Point head = this.body.get(this.body.size() - 1);
         int x = (int) (head.x + Point.dHip*Math.cos(Math.toRadians(this.angle)));
         int y = (int) (head.y + Point.dHip*Math.sin(Math.toRadians(this.angle)));
-        this.body.add(new Point(x,y, visibility));
+
+        // Update values for himself and tell it to the server
+        MainThread.remotePoints.addPoint(new Point(x,y, visibility), 0);
     }
 
     @Override
     public String toString() {
         return this.angle + " " + this.body.get(0).x + " " + this.body.get(0).y;
     }
+
+
 }
