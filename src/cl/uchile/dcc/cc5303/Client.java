@@ -108,7 +108,7 @@ public class Client extends Thread{
                     }else {
                         skipFrames = 0;
                         if (!player.ended) {
-                            new_point = player.growUp(true);//add the new point
+                            new_point = player.growUp(true);//returns the new point
                             remotePoints.addPoint(new_point, id);//add the new point
                         }
 
@@ -128,7 +128,7 @@ public class Client extends Thread{
 
                 if (!player.ended) {
                     // Only looking at one snake for the moment
-                    Iterator it = pixels[0].iterator();
+                    Iterator it = ((LinkedHashSet) pixels[id].clone()).iterator();
                     int i = 0;
                     if (it.hasNext())
                         player.body.clear();
@@ -136,14 +136,16 @@ public class Client extends Thread{
                         player.ended = true;
                     while(it.hasNext()) {
                         IPoint ptemp =(IPoint) it.next();
+                        it.remove();
                         player.body.add(i, new Point(ptemp.getX(), ptemp.getY()));
                         i++;
+                        // To avoid concurrent Executions
                     }
                 }
 
                 // Tablero
 
-                tablero.points = remotePoints.getList().clone();//pass the point to the board
+                tablero.points = remotePoints.getList();//pass the point to the board
                 tablero.repaint();//paint the points in the board
 
                 try {

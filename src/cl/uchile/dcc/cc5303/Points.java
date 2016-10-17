@@ -6,6 +6,7 @@ package cl.uchile.dcc.cc5303;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Stack;
 
@@ -38,11 +39,14 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     private boolean check(IPoint p) throws RemoteException {
         for (int i = 0; i < 5; i++) {
-            for (IPoint p2 : list[i]) {
-                // TODO : Change the evaluation criteria
-                if (((abs(p.getX() - p2.getX()) < 3  || p.getY() == p2.getY()) && (abs(p.getY() - p2.getY()) < 3 && p.getX() == p2.getX())) && (p2.getVisible() == p.getVisible() && p.getVisible())) {
-                   return false;
+            // TODO : Change the evaluation criteria
+            Iterator it = ((LinkedHashSet)list[i].clone()).iterator();
+            while (it.hasNext()) {
+                IPoint p2 = (IPoint) it.next();
+                if (((abs(p.getX() - p2.getX()) < 3 || p.getY() == p2.getY()) && (abs(p.getY() - p2.getY()) < 3 && p.getX() == p2.getX())) && (p2.getVisible() == p.getVisible() && p.getVisible())) {
+                    return false;
                 }
+                it.remove();
             }
         }
         return true;
