@@ -13,4 +13,5 @@ public interface IPoint extends Remote {
     public int getY() throws RemoteException;
 
     public boolean getVisible() throws RemoteException;
+
 }

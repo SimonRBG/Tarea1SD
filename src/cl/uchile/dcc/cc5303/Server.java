@@ -20,7 +20,6 @@ public class Server {
         try{
             // Line to solve rmiregistry Bug
             LocateRegistry.createRegistry(1100);
-
             points = new Points();
             Naming.rebind(URL_SERVER, points);
             System.out.println("Objeto points publicado en: " + URL_SERVER);

@@ -32,6 +32,5 @@ public class Point extends UnicastRemoteObject implements IPoint {
     public boolean getVisible() throws RemoteException {
         return visible;
     }
-
 }
 

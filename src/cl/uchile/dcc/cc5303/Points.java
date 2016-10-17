@@ -3,10 +3,11 @@ package cl.uchile.dcc.cc5303;
 /**
  * Created by pecesito on 12-10-16.
  */
-import java.util.ArrayList;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedHashSet;
+import java.util.Stack;
 
 import static java.lang.Math.abs;
 
@@ -15,10 +16,13 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     // We have to keep in mind the order
     LinkedHashSet<IPoint> list[];
+    Stack ids = new Stack();
+
     public Points() throws RemoteException{
         list = new LinkedHashSet[5];
         for(int i = 0; i<5; i++) {
             list[i] = new LinkedHashSet<IPoint>();
+            ids.push(4-i);
         }
     }
 
@@ -29,6 +33,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         else{
             list[i].clear();
         }
+        notifyOperation("new Point Added"+po.getX()+", "+po.getY()+", "+po.getVisible()+". id: "+i);
     }
 
     private boolean check(IPoint p) throws RemoteException {
@@ -44,6 +49,16 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException {
+        notifyOperation("getList");
         return list;
+    }
+
+    //gave a new id for 5 users
+    public int getId() throws RemoteException{
+        notifyOperation("new id"+ids.peek());
+        return (int)ids.pop();
+    }
+    private void notifyOperation(String s){
+        System.out.println("Operation: "+s);
     }
 }
