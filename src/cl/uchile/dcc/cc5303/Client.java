@@ -20,7 +20,7 @@ public class Client extends Thread{
     private final static String TITLE = "Juego - CC5303";
     public static IPoints remotePoints;
 
-    private final static int WIDTH = 300, HEIGHT = 300;
+    private final static int WIDTH = 400, HEIGHT = 400;
     private final static int UPDATE_RATE = 30;
     private final static int GROW_RATE = 3;
 
@@ -124,12 +124,21 @@ public class Client extends Thread{
                 }
 
                 // Tablero
-
-                tablero.points = remotePoints.getList();//pass the point to the board
-                tablero.repaint();//paint the points in the board
+                boolean aux=true;
+                while(aux){
+                    try {
+                        tablero.points = remotePoints.getList();//pass the point to the board
+                        tablero.repaint();//paint the points in the board
+                        aux=false;
+                    }catch(java.rmi.UnmarshalException e){
+                        //TODO print sometring??
+                        System.out.println("wait");
+                        continue;
+                    }
+                }
 
                 try {
-                    this.sleep(1000 / UPDATE_RATE);
+                    this.sleep(5000 / UPDATE_RATE);
                 } catch (InterruptedException ex) {
 
                 }

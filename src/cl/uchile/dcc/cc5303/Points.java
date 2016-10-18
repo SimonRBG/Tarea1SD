@@ -47,6 +47,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                     return false;
                 }
                 it.remove();
+                break;
             }
         }
         return true;
@@ -54,7 +55,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException {
         notifyOperation("getList");
-        return list;
+        return list.clone();
     }
 
     //gave a new id for 5 users
