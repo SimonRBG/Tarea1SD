@@ -65,6 +65,8 @@ public class Client extends Thread{
         }
     }
 
+
+
     @Override
     public void run() {
         try {
@@ -121,35 +123,13 @@ public class Client extends Thread{
                     frames = 0;
                 }
 
-                //TODO : Update values of others snakes
-
-                // Recuperation of all the values
-                LinkedHashSet<IPoint>[] pixels = remotePoints.getList();
-
-                if (!player.ended) {
-                    // Only looking at one snake for the moment
-                    Iterator it = ((LinkedHashSet) pixels[id].clone()).iterator();
-                    int i = 0;
-                    if (it.hasNext())
-                        player.body.clear();
-                    else if (player.body.size() > 1)
-                        player.ended = true;
-                    while(it.hasNext()) {
-                        IPoint ptemp =(IPoint) it.next();
-                        it.remove();
-                        player.body.add(i, new Point(ptemp.getX(), ptemp.getY()));
-                        i++;
-                        // To avoid concurrent Executions
-                    }
-                }
-
                 // Tablero
 
                 tablero.points = remotePoints.getList();//pass the point to the board
                 tablero.repaint();//paint the points in the board
 
                 try {
-                    this.sleep(5000 / UPDATE_RATE);
+                    this.sleep(1000 / UPDATE_RATE);
                 } catch (InterruptedException ex) {
 
                 }

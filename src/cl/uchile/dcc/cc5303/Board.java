@@ -61,17 +61,15 @@ public class Board extends Canvas{
             Iterator itr = l.iterator();
             while (itr.hasNext()) {
                 IPoint p = (IPoint) itr.next();
-
-
                 try{
-                    System.out.print(p.getX()+" "+p.getY()+" "+p.getVisible()+", ");
+                    //System.out.print(p.getX()+" "+p.getY()+" "+p.getVisible()+", ");
                     if (p.getVisible())
                         buffer.fillOval(p.getX() - Point.dHip / 2, p.getY() - Point.dHip / 2, Point.dHip, Point.dHip);
                 }catch (RemoteException e){
                     e.printStackTrace();
                 }
             }
-            System.out.println("");
+            //System.out.println("");
         }
 
     }

@@ -8,21 +8,14 @@ import java.util.HashSet;
 public class Player {
 
     public int angle;
-    public ArrayList<Point> body;
     public boolean ended;
     public int id;
+    public Point head;
 
     public Player(Point point, int id) {
         this.ended = false;
-        this.body = new ArrayList<Point>();
-        this.body.add(point);
+        this.head = point;
         this.id = id;
-    }
-
-    public void draw(Graphics graphics) {
-        for (Point p : this.body)
-            if (p.visible)
-                graphics.fillOval(p.x - Point.dHip/2, p.y - Point.dHip/2, Point.dHip, Point.dHip);
     }
 
     public void moveUp() {
@@ -34,17 +27,18 @@ public class Player {
     }
 
     public Point growUp(boolean visibility) throws RemoteException {
-        Point head = this.body.get(this.body.size() - 1);
+        //Point head = this.body.get(this.body.size() - 1);
         int x = (int) (head.x + Point.dHip*Math.cos(Math.toRadians(this.angle)));
         int y = (int) (head.y + Point.dHip*Math.sin(Math.toRadians(this.angle)));
 
+        head = new Point(x,y, visibility);
         // Update values for himself and tell it to the server
-        return new Point(x,y, visibility);
+        return head;
     }
 
     @Override
     public String toString() {
-        return this.angle + " " + this.body.get(0).x + " " + this.body.get(0).y;
+        return this.angle + " " + this.head.x + " " + this.head.y;
     }
 
 
