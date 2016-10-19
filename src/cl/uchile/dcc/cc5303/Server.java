@@ -11,7 +11,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 
 public class Server {
-    public static final String URL_SERVER = "rmi://10.13.1.162:1099/zatackaServer";
+    public static final String URL_SERVER = "rmi://localhost:1099/zatackaServer";
 
     public static void main(String[] args) {
 
@@ -19,7 +19,7 @@ public class Server {
 
         try{
             // Line to solve rmiregistry Bug
-            String hostname = "10.13.1.162";
+            String hostname = "localhost";
             System.setProperty("java.rmi.server.hostname", hostname);
             LocateRegistry.createRegistry(1099);
             points = new Points();

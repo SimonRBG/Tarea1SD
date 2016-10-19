@@ -33,6 +33,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
         else{
             list[i].clear();
+            notifyOperation("player "+i+" lost!!");
         }
         notifyOperation("new Point Added"+po.getX()+", "+po.getY()+", "+po.getVisible()+". id: "+i);
     }
@@ -41,9 +42,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         for (int i = 0; i < 5; i++) {
             // TODO : Change the evaluation criteria
             Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
+            int px = p.getX();
+            int py = p.getY();
+            boolean pv = p.getVisible();
             while (it.hasNext()) {
                 IPoint p2 = (IPoint) it.next();
-                if (((abs(p.getX() - p2.getX()) < 3 || p.getY() == p2.getY()) && (abs(p.getY() - p2.getY()) < 3 && p.getX() == p2.getX())) && (p2.getVisible() == p.getVisible() && p.getVisible())) {
+                if ( abs(px- p2.getX()) < Point.dHip/2 && abs(py - p2.getY())<Point.dHip/2  && (p2.getVisible() == pv && pv)){
                     return false;
                 }
                 it.remove();

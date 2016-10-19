@@ -71,7 +71,7 @@ public class Client extends Thread{
     public void run() {
         try {
 
-            String hostname = "10.13.1.162";
+            String hostname = "localhost";
             System.setProperty("java.rmi.server.hostname", hostname);
 
 
@@ -92,17 +92,20 @@ public class Client extends Thread{
             int posy = random.nextInt(HEIGHT);
             player = new Player(new Point(posx, posy),id);
 
-            int frames = 0;
+            int frames = 2;
             int skipFrames = 0;
             while (true) { // Main loop
                 // Controles
-                if (keys[KeyEvent.VK_UP]) {
-                    System.out.println("UP");
-                    player.moveUp();
-                }
-                if (keys[KeyEvent.VK_DOWN]) {
-                    System.out.println("DOWN");
-                    player.moveDown();
+                if(!player.ended){
+                    if (keys[KeyEvent.VK_UP]) {
+                        System.out.println("UP");
+                        player.moveUp();
+                    }
+                    if (keys[KeyEvent.VK_DOWN]) {
+                        System.out.println("DOWN");
+                        player.moveDown();
+                    }
+
                 }
                 ++frames;
 
@@ -134,6 +137,9 @@ public class Client extends Thread{
                 while(aux){
                     try {
                         tablero.points = remotePoints.getList();//pass the point to the board
+                        if(tablero.points[id].size()==0){
+                            player.ended=true;
+                        }
                         tablero.repaint();//paint the points in the board
                         aux=false;
                     }catch(java.rmi.UnmarshalException e){
