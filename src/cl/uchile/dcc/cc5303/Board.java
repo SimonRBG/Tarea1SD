@@ -46,8 +46,9 @@ public class Board extends Canvas{
     }
 
     private void draw(LinkedHashSet<IPoint>[] points){
-        if(points==null)
-                return;
+        if(points==null) {
+            return;
+        }
         Color[] colors = new Color[5];
         colors[0] = Color.red;
         colors[1] = Color.blue;

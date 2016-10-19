@@ -40,7 +40,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     private boolean check(IPoint p) throws RemoteException {
         for (int i = 0; i < 5; i++) {
             // TODO : Change the evaluation criteria
-            Iterator it = ((LinkedHashSet)list[i].clone()).iterator();
+            Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
             while (it.hasNext()) {
                 IPoint p2 = (IPoint) it.next();
                 if (((abs(p.getX() - p2.getX()) < 3 || p.getY() == p2.getY()) && (abs(p.getY() - p2.getY()) < 3 && p.getX() == p2.getX())) && (p2.getVisible() == p.getVisible() && p.getVisible())) {
