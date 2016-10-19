@@ -20,7 +20,7 @@ public class Client extends Thread{
     private final static String TITLE = "Juego - CC5303";
     public static IPoints remotePoints;
 
-    private final static int WIDTH = 400, HEIGHT = 400;
+    private final static int WIDTH = 300, HEIGHT = 300;
     private final static int UPDATE_RATE = 30;
     private final static int GROW_RATE = 3;
 
@@ -70,8 +70,14 @@ public class Client extends Thread{
     @Override
     public void run() {
         try {
+
+            String hostname = "10.13.1.162";
+            System.setProperty("java.rmi.server.hostname", hostname);
+
+
             // Recuperation of the shared object
             remotePoints = (IPoints) Naming.lookup(Server.URL_SERVER);
+            System.out.println(Server.URL_SERVER);
             try{
                 id = remotePoints.getId();
             }catch(Exception e){
@@ -138,7 +144,7 @@ public class Client extends Thread{
                 }
 
                 try {
-                    this.sleep(5000 / UPDATE_RATE);
+                    this.sleep(1000 / UPDATE_RATE);
                 } catch (InterruptedException ex) {
 
                 }
