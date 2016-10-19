@@ -47,7 +47,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                     return false;
                 }
                 it.remove();
-                break;
             }
         }
         return true;

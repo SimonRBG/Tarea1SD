@@ -21,7 +21,7 @@ public class Server {
             // Line to solve rmiregistry Bug
             String hostname = "10.13.1.162";
             System.setProperty("java.rmi.server.hostname", hostname);
-            LocateRegistry.createRegistry(1100);
+            LocateRegistry.createRegistry(1099);
             points = new Points();
             Naming.rebind(URL_SERVER, points);
             System.out.println("Objeto points publicado en: " + URL_SERVER);
