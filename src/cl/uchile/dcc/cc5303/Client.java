@@ -94,6 +94,13 @@ public class Client extends Thread{
 
             int frames = 2;
             int skipFrames = 0;
+
+
+            while(!remotePoints.allPlayersReady()){
+                continue;//sleep(100);
+            }
+
+
             while (true) { // Main loop
                 // Controles
                 if(!player.ended){

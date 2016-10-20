@@ -14,5 +14,7 @@ public interface IPoints extends Remote{
     public LinkedHashSet<IPoint>[] getList() throws RemoteException;
 
     public int getId() throws RemoteException;
+
+    public boolean allPlayersReady() throws RemoteException;
 }
 

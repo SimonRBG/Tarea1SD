@@ -15,9 +15,11 @@ import static java.lang.Math.abs;
 
 public class Points extends UnicastRemoteObject  implements IPoints {
 
+    int numplayers = 2;
     // We have to keep in mind the order
     LinkedHashSet<IPoint> list[];
     Stack ids = new Stack();
+    boolean ready = false;
 
     public Points() throws RemoteException{
         list = new LinkedHashSet[5];
@@ -63,9 +65,17 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     //gave a new id for 5 users
     public int getId() throws RemoteException{
-        notifyOperation("new id"+ids.peek());
+        int id = (int)ids.peek();
+        notifyOperation("new id "+id);
+        if(id == numplayers-1)
+            ready = true;
         return (int)ids.pop();
     }
+
+    public boolean allPlayersReady() throws RemoteException{
+        return ready;
+    }
+
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);
     }
