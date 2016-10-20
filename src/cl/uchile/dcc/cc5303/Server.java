@@ -23,8 +23,16 @@ public class Server {
             // Line to solve rmiregistry Bug
             String hostname = "localhost";
             System.setProperty("java.rmi.server.hostname", hostname);
+
+            // Parsing of the argument to launch with -n option
+            int n = 2;
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equals("-n")  && !args[i+1].isEmpty()){
+                    n = Integer.getInteger(args[i+1]);
+                }
+            }
             LocateRegistry.createRegistry(1099);
-            points = new Points();
+            points = new Points(n);
             Naming.rebind(URL_SERVER, points);
             System.out.println("Objeto points publicado en: " + URL_SERVER);
 

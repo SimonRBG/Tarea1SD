@@ -74,7 +74,6 @@ public class Client extends Thread{
             String hostname = "localhost";
             System.setProperty("java.rmi.server.hostname", hostname);
 
-
             // Recuperation of the shared object
             remotePoints = (IPoints) Naming.lookup(Server.URL_SERVER);
             System.out.println(Server.URL_SERVER);

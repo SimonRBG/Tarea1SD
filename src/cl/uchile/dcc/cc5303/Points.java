@@ -29,6 +29,15 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
     }
 
+    public Points(int n) throws RemoteException{
+        this.numplayers = n;
+        list = new LinkedHashSet[5];
+        for(int i = 0; i<5; i++) {
+            list[i] = new LinkedHashSet<IPoint>();
+            ids.push(4-i);
+        }
+    }
+
     public void addPoint(IPoint po, int i) throws RemoteException{
         if (check(po)) {
             list[i].add(po);
