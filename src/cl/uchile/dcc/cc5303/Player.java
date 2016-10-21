@@ -11,11 +11,13 @@ public class Player {
     public boolean ended;
     public int id;
     public Point head;
+    public int score;
 
     public Player(Point point, int id) {
         this.ended = false;
         this.head = point;
         this.id = id;
+        this.score = 0;
     }
 
     public void moveUp() {

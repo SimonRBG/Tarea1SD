@@ -15,6 +15,14 @@ public interface IPoints extends Remote{
 
     public int getId() throws RemoteException;
 
+    public int getScore(int id) throws RemoteException;
+
+    public int[] getScores() throws RemoteException;
+
+    public int getNumPlayers() throws RemoteException;
+
     public boolean allPlayersReady() throws RemoteException;
+
+    public void notify_score(int id) throws RemoteException;
 }
 

@@ -11,10 +11,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Random;
 
+public class Client extends Thread{
 /**
  * Created by pecesito on 17-10-16.
  */
-public class Client extends Thread{
 
     public boolean[] keys;
     private final static String TITLE = "Juego - CC5303";
@@ -76,6 +76,7 @@ public class Client extends Thread{
 
             // Recuperation of the shared object
             remotePoints = (IPoints) Naming.lookup(Server.URL_SERVER);
+            this.tablero.numplayers = remotePoints.getNumPlayers();
             System.out.println(Server.URL_SERVER);
             try{
                 id = remotePoints.getId();
@@ -143,6 +144,9 @@ public class Client extends Thread{
                 while(aux){
                     try {
                         tablero.points = remotePoints.getList();//pass the point to the board
+                        tablero.scores = remotePoints.getScores();
+                        player.score = remotePoints.getScore(player.id);
+
                         if(tablero.points[id].size()==0){
                             player.ended=true;
                         }

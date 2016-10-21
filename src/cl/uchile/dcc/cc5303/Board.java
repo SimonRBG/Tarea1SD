@@ -13,11 +13,12 @@ public class Board extends Canvas{
     // Jugadores y elementos del juego acá
     public Player p1, p2;
     public LinkedHashSet<IPoint> points[];
+    public int scores[];
+    public int numplayers;
 
     // doble buffer para dibujar
     public Image img;
     public Graphics buffer;
-
 
     public Board(int width, int height) {
         this.width = width;
@@ -41,11 +42,11 @@ public class Board extends Canvas{
 
         // dibujar elementos del juego
 
-        draw(points);
+        draw(points, scores, numplayers);
         graphics.drawImage(img, 0, 0, null);
     }
 
-    private void draw(LinkedHashSet<IPoint>[] points){
+    private void draw(LinkedHashSet<IPoint>[] points, int scores[], int numplayers){
         if(points==null) {
             return;
         }
@@ -56,8 +57,12 @@ public class Board extends Canvas{
         colors[3] = Color.green;
         colors[4] = Color.cyan;
         //draw points for each Player
-        for(int j = 0; j < points.length; j++) {//TODO change to 5 players
+        for(int j = 0; j < numplayers; j++) {
             buffer.setColor(colors[j]);
+            // Todo: draw the score (Doesn't draw for the first one why ????)
+            // As example
+            buffer.drawString("Joueur " + j + " - " + scores[j] + " pts" , getWidth() - 100, 15*j+20 );
+
             LinkedHashSet<IPoint> l = points[j];
             Iterator itr = l.iterator();
             while (itr.hasNext()) {
