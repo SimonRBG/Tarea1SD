@@ -24,10 +24,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     Stack ids = new Stack();
     boolean ready = false;
 
-    /*public Points() throws RemoteException{
-	Points(2,);	
-    }*/
-
     public Points(int n, int w, int h) throws RemoteException{
 	this.w=w;
 	this.h=h;
@@ -59,6 +55,11 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             int px = p.getX();
             int py = p.getY();
             boolean pv = p.getVisible();
+	    //check borders
+	    if(px > w || px < 0 || py > h || py < 0){
+		return false;
+	    }
+	    //check other points
             while (it.hasNext()) {
                 IPoint p2 = (IPoint) it.next();
                 if ( abs(px- p2.getX()) < Point.dHip/2 && abs(py - p2.getY())<Point.dHip/2  && (p2.getVisible() == pv && pv)) {
