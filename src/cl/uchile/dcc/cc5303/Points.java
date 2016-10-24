@@ -19,18 +19,21 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     // We have to keep in mind the order
     LinkedHashSet<IPoint> list[];
     int scores[];
+    boolean looses[];
     int w, h;
 
     Stack ids = new Stack();
     boolean ready = false;
 
     public Points(int n, int w, int h) throws RemoteException{
-	this.w=w;
-	this.h=h;
+	    this.w=w;
+	    this.h=h;
         this.scores = new int[n];
+        this.looses = new boolean[n];
         this.numplayers = n;
         list = new LinkedHashSet[n];
         for(int i = 0; i<n; i++) {
+            this.looses[i] = false;
             list[i] = new LinkedHashSet<IPoint>();
             ids.push(n-1-i);
         }
@@ -42,6 +45,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
         else{
             list[i].clear();
+            this.looses[i] = true;
             notify_score(i);
             notifyOperation("player "+i+" lost!!");
         }
@@ -78,7 +82,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     public void notify_score(int id) throws RemoteException {
         for (int i = 0; i < numplayers; i++) {
-            if (i != id)
+            if (i != id && !this.looses[i])
                 scores[i]++;
         }
     }
