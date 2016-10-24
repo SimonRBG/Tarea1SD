@@ -20,7 +20,7 @@ public class Client extends Thread{
     private final static String TITLE = "Juego - CC5303";
     public static IPoints remotePoints;
 
-    private final static int WIDTH = 300, HEIGHT = 300;
+    private int w, h;
     private final static int UPDATE_RATE = 30;
     private final static int GROW_RATE = 3;
 
@@ -32,17 +32,19 @@ public class Client extends Thread{
 
     public Client() {
         try {
+	    w = Server.w;
+	    h = Server.h;
             keys = new boolean[KeyEvent.KEY_LAST];
             frame = new JFrame(TITLE);
             frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            tablero = new Board(WIDTH, HEIGHT);
+            tablero = new Board(w, h);
 //            tablero.p1 = player;
             //tablero.p2 = player2;
 
             frame.add(tablero);
-            tablero.setSize(WIDTH, HEIGHT);
+            tablero.setSize(Server.w, Server.h);
 
             frame.pack();
             frame.addKeyListener(new KeyListener() {
@@ -88,8 +90,8 @@ public class Client extends Thread{
 
             //Player Initial position
             Random random = new Random();
-            int posx = random.nextInt(WIDTH);
-            int posy = random.nextInt(HEIGHT);
+            int posx = random.nextInt(w);
+            int posy = random.nextInt(h);
             player = new Player(new Point(posx, posy),id);
 
             int frames = 2;

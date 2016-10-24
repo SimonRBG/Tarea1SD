@@ -15,30 +15,24 @@ import static java.lang.Math.abs;
 
 public class Points extends UnicastRemoteObject  implements IPoints {
 
-    int numplayers = 2;
+    int numplayers;
     // We have to keep in mind the order
     LinkedHashSet<IPoint> list[];
     int scores[];
+    int w, h;
 
     Stack ids = new Stack();
     boolean ready = false;
 
-    public Points() throws RemoteException{
-        this.scores = new int[5];
-        list = new LinkedHashSet[5];
-        for(int i = 0; i<5; i++) {
-            list[i] = new LinkedHashSet<IPoint>();
-            ids.push(4 - i);
-        }
-    }
-
-    public Points(int n) throws RemoteException{
+    public Points(int n, int w, int h) throws RemoteException{
+	this.w=w;
+	this.h=h;
         this.scores = new int[n];
         this.numplayers = n;
-        list = new LinkedHashSet[5];
-        for(int i = 0; i<5; i++) {
+        list = new LinkedHashSet[n];
+        for(int i = 0; i<n; i++) {
             list[i] = new LinkedHashSet<IPoint>();
-            ids.push(4-i);
+            ids.push(n-1-i);
         }
     }
 
@@ -55,12 +49,17 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     private boolean check(IPoint p) throws RemoteException {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < this.numplayers; i++) {
             // TODO : Change the evaluation criteria
             Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
             int px = p.getX();
             int py = p.getY();
             boolean pv = p.getVisible();
+	    //check borders
+	    if(px > w || px < 0 || py > h || py < 0){
+		return false;
+	    }
+	    //check other points
             while (it.hasNext()) {
                 IPoint p2 = (IPoint) it.next();
                 if ( abs(px- p2.getX()) < Point.dHip/2 && abs(py - p2.getY())<Point.dHip/2  && (p2.getVisible() == pv && pv)) {
