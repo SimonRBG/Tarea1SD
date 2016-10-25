@@ -18,7 +18,9 @@ public class Board extends Canvas{
 
     // doble buffer para dibujar
     public Image img;
+    public Image score_board;
     public Graphics buffer;
+    public Graphics buffer_score;
 
     public Board(int width, int height) {
         this.width = width;
@@ -34,16 +36,24 @@ public class Board extends Canvas{
     public void paint(Graphics graphics) {
         if(this.buffer==null){
             this.img = createImage(getWidth(), getHeight());
+            this.score_board = createImage((int) (getWidth()*0.25), getHeight());
             this.buffer = this.img.getGraphics();
+            this.buffer_score = this.score_board.getGraphics();
         }
 
         this.buffer.setColor(Color.black);
         this.buffer.fillRect(0, 0, getWidth(), getHeight());
+        this.buffer_score.setColor(Color.DARK_GRAY);
+        this.buffer_score.fillRect(0, 0, (int) (getWidth()*0.25), getHeight());
+
 
         // dibujar elementos del juego
 
         draw(points, scores, numplayers);
+
         graphics.drawImage(img, 0, 0, null);
+        graphics.drawImage(score_board, 0, 0, null);
+
     }
 
     private void draw(LinkedHashSet<IPoint>[] points, int scores[], int numplayers){

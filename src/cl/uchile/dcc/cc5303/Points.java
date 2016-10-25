@@ -59,8 +59,9 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             int px = p.getX();
             int py = p.getY();
             boolean pv = p.getVisible();
-	    //check borders
-	    if(px > w || px < 0 || py > h || py < 0){
+	    //check border
+            // handle de score boards
+	    if(px > w || px < w*0.25 || py > h || py < 0){
 		return false;
 	    }
 	    //check other points

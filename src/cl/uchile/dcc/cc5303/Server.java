@@ -12,7 +12,7 @@ import java.rmi.registry.LocateRegistry;
 
 public class Server {
     public static final String URL_SERVER = "rmi://localhost:1099/zatackaServer";
-    public static final int w = 300, h = 300;
+    public static final int w = 400, h = 300;
 
 
     public static void main(String[] args) {
