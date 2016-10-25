@@ -91,9 +91,10 @@ public class Client extends Thread{
             //Player Initial position
             // handle score border
             Random random = new Random();
-            int posx = random.nextInt(w- ((int) 0.25*w));
+            int posx = random.nextInt(w - w/4)+ w/4;
             int posy = random.nextInt(h);
-            player = new Player(new Point(posx + ((int) 0.25*w) , posy),id);
+            System.out.println( posx  + " - " +  posy);
+            player = new Player(new Point(posx, posy),id);
 
             int frames = 2;
             int skipFrames = 0;
