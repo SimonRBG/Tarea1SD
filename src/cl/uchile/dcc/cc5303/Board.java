@@ -66,13 +66,25 @@ public class Board extends Canvas{
         colors[2] = Color.yellow;
         colors[3] = Color.green;
         colors[4] = Color.cyan;
-        //draw points for each Player
+
+        // Ordering
+        int ind_p[] = new int[numplayers];
+        int max_p[] = new int[numplayers];
+        for (int j = 0; j < numplayers; j++) {
+            for (int i = 0; i < numplayers ; i++) {
+                if (max_p[i] <= scores[j]) {
+                    for (int o = numplayers-1; o > i; o--) {
+                        max_p[o] = max_p[o-1];
+                        ind_p[o] = ind_p[o-1];
+                    }
+                    max_p[i] = scores[j];
+                    ind_p[i] = j;
+                    break;
+                }
+            }
+        }
         for(int j = 0; j < numplayers; j++) {
             buffer.setColor(colors[j]);
-            // Todo: draw the score (Doesn't draw for the first one why ????)
-            // As example
-            buffer.drawString("Joueur " + j + " - " + scores[j] + " pts" , getWidth() - 100, 15*j+20 );
-
             LinkedHashSet<IPoint> l = points[j];
             Iterator itr = l.iterator();
             while (itr.hasNext()) {
@@ -86,6 +98,10 @@ public class Board extends Canvas{
                 }
             }
             //System.out.println("");
+        }
+        for (int i = 0; i < numplayers; i++) {
+            buffer_score.setColor(colors[ind_p[i]]);
+            buffer_score.drawString("Joueur " + ind_p[i] + " - " + max_p[i] + " pts" ,  1, 15*i+20 );
         }
 
     }
