@@ -40,10 +40,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     public void addPoint(IPoint po, int i) throws RemoteException{
+        // If the point doesn't choc with another one
         if (check(po)) {
             list[i].add(po);
         }
         else{
+            // Clear all the snake, save tha it lost and telling to the other to update their score
             list[i].clear();
             this.looses[i] = true;
             notify_score(i);
@@ -59,12 +61,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             int px = p.getX();
             int py = p.getY();
             boolean pv = p.getVisible();
-	    //check border
-            // handle de score boards
-	    if(px > w || px < w/4 || py > h || py < 0){
-		return false;
-	    }
-	    //check other points
+            // Check border
+            // Handle de score boards
+            if(px > w || px < w/4 || py > h || py < 0){
+                return false;
+            }
+            //Check other points
             while (it.hasNext()) {
                 IPoint p2 = (IPoint) it.next();
                 if ( abs(px- p2.getX()) < Point.dHip/2 && abs(py - p2.getY())<Point.dHip/2  && (p2.getVisible() == pv && pv)) {
@@ -82,6 +84,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     public void notify_score(int id) throws RemoteException {
+        // Update the score of all the others snakes alive
         for (int i = 0; i < numplayers; i++) {
             if (i != id && !this.looses[i])
                 scores[i]++;
@@ -100,7 +103,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         return numplayers;
     }
 
-    //gave a new id for 5 users
+    // Gave a new id for 5 users
     public int getId() throws RemoteException{
         int id = (int)ids.peek();
         notifyOperation("new id "+id);

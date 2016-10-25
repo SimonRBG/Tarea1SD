@@ -2,7 +2,6 @@ package cl.uchile.dcc.cc5303;
 
 import java.awt.*;
 import java.rmi.RemoteException;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 
@@ -48,7 +47,6 @@ public class Board extends Canvas{
 
 
         // dibujar elementos del juego
-
         draw(points, scores, numplayers);
 
         graphics.drawImage(img, 0, 0, null);
@@ -67,7 +65,7 @@ public class Board extends Canvas{
         colors[3] = Color.green;
         colors[4] = Color.cyan;
 
-        // Ordering
+        // Ordering the player in function of the score
         int ind_p[] = new int[numplayers];
         int max_p[] = new int[numplayers];
         for (int j = 0; j < numplayers; j++) {
@@ -90,18 +88,17 @@ public class Board extends Canvas{
             while (itr.hasNext()) {
                 IPoint p = (IPoint) itr.next();
                 try{
-                    //System.out.print(p.getX()+" "+p.getY()+" "+p.getVisible()+", ");
                     if (p.getVisible())
                         buffer.fillOval(p.getX() - Point.dHip / 2, p.getY() - Point.dHip / 2, Point.dHip, Point.dHip);
                 }catch (RemoteException e){
                     e.printStackTrace();
                 }
             }
-            //System.out.println("");
         }
+        // Draw the scores
         for (int i = 0; i < numplayers; i++) {
             buffer_score.setColor(colors[ind_p[i]]);
-            buffer_score.drawString("Joueur " + ind_p[i] + " - " + max_p[i] + " pts" ,  1, 15*i+20 );
+            buffer_score.drawString("Player " + ind_p[i] + " - " + max_p[i] + " pts" ,  1, 15*i+20 );
         }
 
     }

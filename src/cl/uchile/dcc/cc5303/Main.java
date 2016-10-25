@@ -6,8 +6,6 @@ public class Main {
         System.out.println("Iniciando Juego de SSDD...");
 
         Client c1 = new Client();
-        //Client c2 = new Client();
         c1.start();
-        //c2.start();
     }
 }

@@ -29,13 +29,14 @@ public class Server {
             for (int i = 0; i < args.length; i++) {
                 if (args[i].equals("-n")  && args[i+1]!=null){
                     n = Integer.parseInt(args[i+1]);
- 		    if (n > 5){
-			n = 5;
-		    }
-		    if (n < 1){
-			n = 1;
-		    }
-		    break;
+                    // Assume that we can't have negatives and >5 values
+ 		            if (n > 5){
+			            n = 5;
+		            }
+		            if (n < 1){
+			            n = 1;
+		            }
+		            break;
                 }
             }
 	    

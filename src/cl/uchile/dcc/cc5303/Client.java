@@ -40,8 +40,6 @@ public class Client extends Thread{
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             tablero = new Board(w, h);
-//            tablero.p1 = player;
-            //tablero.p2 = player2;
 
             frame.add(tablero);
             tablero.setSize(Server.w, Server.h);
@@ -88,8 +86,8 @@ public class Client extends Thread{
             }
 
 
-            //Player Initial position
-            // handle score border
+            // Player Initial position
+            // Handle score border
             Random random = new Random();
             int posx = random.nextInt(w - w/4)+ w/4;
             int posy = random.nextInt(h);
@@ -99,14 +97,12 @@ public class Client extends Thread{
             int frames = 2;
             int skipFrames = 0;
 
-
             while(!remotePoints.allPlayersReady()){
                 continue;//sleep(100);
             }
 
-
             while (true) { // Main loop
-                // Controles
+                // Controls
                 if(!player.ended){
                     if (keys[KeyEvent.VK_UP]) {
                         System.out.println("UP");
@@ -130,8 +126,10 @@ public class Client extends Thread{
                     }else {
                         skipFrames = 0;
                         if (!player.ended) {
-                            new_point = player.growUp(true);//returns the new point
-                            remotePoints.addPoint(new_point, id);//add the new point
+                            // Returns the new point
+                            new_point = player.growUp(true);
+                            // Add the new point
+                            remotePoints.addPoint(new_point, id);
                         }
 
                         if(random.nextFloat()< 0.1){
@@ -147,7 +145,9 @@ public class Client extends Thread{
                 boolean aux=true;
                 while(aux){
                     try {
-                        tablero.points = remotePoints.getList();//pass the point to the board
+                        // Pass the points to the board
+                        tablero.points = remotePoints.getList();
+                        // Obtaining the scores for drawing
                         tablero.scores = remotePoints.getScores();
                         player.score = remotePoints.getScore(player.id);
 
@@ -162,7 +162,6 @@ public class Client extends Thread{
                         continue;
                     }
                 }
-
                 try {
                     this.sleep(1000 / UPDATE_RATE);
                 } catch (InterruptedException ex) {
