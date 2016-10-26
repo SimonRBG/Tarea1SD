@@ -20,6 +20,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     LinkedHashSet<IPoint> list[];
     int scores[];
     boolean looses[];
+    boolean allLost;
     int w, h;
 
     Stack ids = new Stack();
@@ -30,6 +31,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 	    this.h=h;
         this.scores = new int[n];
         this.looses = new boolean[n];
+	this.allLost = false;
         this.numplayers = n;
         list = new LinkedHashSet[n];
         for(int i = 0; i<n; i++) {
@@ -50,8 +52,24 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             this.looses[i] = true;
             notify_score(i);
             notifyOperation("player "+i+" lost!!");
+	    if(checkAllPlayers()){
+		this.allLost=true;
+		//TODO borrar todo y empezar de nuevo	
+	    }
         }
         notifyOperation("new Point Added"+po.getX()+", "+po.getY()+", "+po.getVisible()+". id: "+i);
+    }
+	
+    public boolean allLost() throws RemoteException{
+	return this.allLost;
+    }
+
+    private boolean checkAllPlayers(){
+	for (int i = 0; i < this.numplayers; i++){
+	    if(!this.looses[i])
+		return false;
+	}
+	return true;
     }
 
     private boolean check(IPoint p) throws RemoteException {

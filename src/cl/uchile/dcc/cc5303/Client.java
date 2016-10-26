@@ -71,7 +71,7 @@ public class Client extends Thread{
     public void run() {
         try {
 
-            String hostname = "localhost";
+            String hostname = "172.17.69.196";
             System.setProperty("java.rmi.server.hostname", hostname);
 
             // Recuperation of the shared object
@@ -88,86 +88,107 @@ public class Client extends Thread{
 
             // Player Initial position
             // Handle score border
-            Random random = new Random();
-            int posx = random.nextInt(w - w/4)+ w/4;
-            int posy = random.nextInt(h);
-            System.out.println( posx  + " - " +  posy);
-            player = new Player(new Point(posx, posy),id);
+			boolean keepPlaying = true;
+            while(keepPlaying){
+				Random random = new Random();
+			    int posx = random.nextInt(w - w/4)+ w/4;
+			    int posy = random.nextInt(h);
+			    System.out.println( posx  + " - " +  posy);
+			    player = new Player(new Point(posx, posy),id);
 
-            int frames = 2;
-            int skipFrames = 0;
+			    int frames = 2;
+			    int skipFrames = 0;
 
-            while(!remotePoints.allPlayersReady()){
-                continue;//sleep(100);
-            }
+			    while(!remotePoints.allPlayersReady()){
+			        continue;//sleep(100);
+			    }
 
-            while (true) { // Main loop
-                // Controls
-                if(!player.ended){
-                    if (keys[KeyEvent.VK_UP]) {
-                        System.out.println("UP");
-                        player.moveUp();
-                    }
-                    if (keys[KeyEvent.VK_DOWN]) {
-                        System.out.println("DOWN");
-                        player.moveDown();
-                    }
+			    while (true) { // Main loop
+			        // Controls
+			        if(!player.ended){
+			            if (keys[KeyEvent.VK_UP]) {
+			                System.out.println("UP");
+			                player.moveUp();
+			            }
+			            if (keys[KeyEvent.VK_DOWN]) {
+			                System.out.println("DOWN");
+			                player.moveDown();
+			        	}
 
-                }
-                ++frames;
+			    	}
+					++frames;
 
-                if (frames == GROW_RATE){
-                    Point new_point = null;
-                    if (skipFrames-- > 0){
-                        if (!player.ended) {
-                            new_point = player.growUp(false);//returns the new point
-                            remotePoints.addPoint(new_point, id);//add the new point
-                        }
-                    }else {
-                        skipFrames = 0;
-                        if (!player.ended) {
-                            // Returns the new point
-                            new_point = player.growUp(true);
-                            // Add the new point
-                            remotePoints.addPoint(new_point, id);
-                        }
+					if (frames == GROW_RATE){
+					    Point new_point = null;
+					    if (skipFrames-- > 0){
+					        if (!player.ended) {
+					            new_point = player.growUp(false);//returns the new point
+					            remotePoints.addPoint(new_point, id);//add the new point
+					        }
+					    }else {
+					        skipFrames = 0;
+					        if (!player.ended) {
+					            // Returns the new point
+					            new_point = player.growUp(true);
+					            // Add the new point
+					            remotePoints.addPoint(new_point, id);
+					        }else{
+								boolean allLost = remotePoints.allLost();
+								if(allLost)
+									break;	//break while true						
+							}
 
-                        if(random.nextFloat()< 0.1){
-                            skipFrames = 2 + random.nextInt(4);
-                            System.out.println(skipFrames);
-                        }
-                    }
+					        if(random.nextFloat()< 0.1){
+					            skipFrames = 2 + random.nextInt(4);
+					            System.out.println(skipFrames);
+					        }
+					    }
 
-                    frames = 0;
-                }
+					    frames = 0;
+					}
 
-                // Tablero
-                boolean aux=true;
-                while(aux){
-                    try {
-                        // Pass the points to the board
-                        tablero.points = remotePoints.getList();
-                        // Obtaining the scores for drawing
-                        tablero.scores = remotePoints.getScores();
-                        player.score = remotePoints.getScore(player.id);
+			    	// Tablero
+			    	boolean aux=true;
+					while(aux){
+					    try {
+					        // Pass the points to the board
+					        tablero.points = remotePoints.getList();
+					        // Obtaining the scores for drawing
+					        tablero.scores = remotePoints.getScores();
+					        player.score = remotePoints.getScore(player.id);
 
-                        if(tablero.points[id].size()==0){
-                            player.ended=true;
-                        }
-                        tablero.repaint();//paint the points in the board
-                        aux=false;
-                    }catch(java.rmi.UnmarshalException e){
-                        //TODO print sometring??
-                        System.out.println("wait");
-                        continue;
-                    }
-                }
-                try {
-                    this.sleep(1000 / UPDATE_RATE);
-                } catch (InterruptedException ex) {
+					        if(tablero.points[id].size()==0){
+					            player.ended=true;
+					        }
+					        tablero.repaint();//paint the points in the board
+					        aux=false;
+					    }catch(java.rmi.UnmarshalException e){
+					        //TODO print sometring??
+					        System.out.println("wait");
+					        continue;
+			        	}
+			    	}
+					try {
+					    this.sleep(1000 / UPDATE_RATE);
+					} catch (InterruptedException ex) {
 
-                }
-            }
+					}
+				}//end while True
+				//TODO press up to keep playing, down to stop playing
+				while(true){//wainting for players to decide				
+					if (keys[KeyEvent.VK_UP]) {
+					    System.out.println("UP");
+						keepPlaying=true;
+						break;
+					}
+					if (keys[KeyEvent.VK_DOWN]) {
+						System.out.println("DOWN");
+						keepPlaying=false;
+						break;
+					}
+				}
+
+	    	}//end while keep playing
         } catch (NotBoundException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
