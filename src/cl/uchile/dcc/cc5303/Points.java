@@ -24,18 +24,21 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     int w, h;
 
     Stack ids = new Stack();
-    boolean ready = false;
+
+    boolean ready[];
 
     public Points(int n, int w, int h) throws RemoteException{
 	    this.w=w;
 	    this.h=h;
         this.scores = new int[n];
         this.looses = new boolean[n];
+        this.ready = new boolean[n];
 	this.allLost = false;
         this.numplayers = n;
         list = new LinkedHashSet[n];
         for(int i = 0; i<n; i++) {
             this.looses[i] = false;
+	    this.ready[i] = false;
             list[i] = new LinkedHashSet<IPoint>();
             ids.push(n-1-i);
         }
@@ -126,13 +129,20 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     public int getId() throws RemoteException{
         int id = (int)ids.peek();
         notifyOperation("new id "+id);
-        if(id == numplayers-1)
-            ready = true;
+	ready[id]=true;        
         return (int)ids.pop();
     }
 
     public boolean allPlayersReady() throws RemoteException{
-        return ready;
+	for (int i = 0; i < numplayers; i++) {
+            if(!ready[i])
+		return false;
+        }
+        return true;
+    }
+
+    public void setReady(int id, boolean r) throws RemoteException{
+	ready[id]=r;
     }
 
     private void notifyOperation(String s){

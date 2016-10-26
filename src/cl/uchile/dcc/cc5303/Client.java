@@ -178,17 +178,21 @@ public class Client extends Thread{
 				}//end while True
 				//TODO press up to keep playing, down to stop playing
 				
-				tablero.repaint();//paint the points in the board
+				tablero.repaint();//paint the points in the board}
+				System.out.println("waiting for key Up to continue, down to finish");			
+				remotePoints.setReady(id,false);
 				while(true){//wainting for players to decide	
-					System.out.println("waiting for key");			
+		
 					if (keys[KeyEvent.VK_UP]) {
 					    System.out.println("UP");
 						keepPlaying=true;
+						remotePoints.setReady(id,true);
 						break;
 					}
 					if (keys[KeyEvent.VK_DOWN]) {
 						System.out.println("DOWN");
 						keepPlaying=false;
+						remotePoints.setReady(id,true);
 						break;
 					}
 				}
