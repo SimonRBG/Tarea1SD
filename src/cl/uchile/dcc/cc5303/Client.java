@@ -23,6 +23,9 @@ public class Client extends Thread{
     private int w, h;
     private final static int UPDATE_RATE = 30;
     private final static int GROW_RATE = 3;
+	private final static int margin_Border = 50;
+
+
 
     private JFrame frame;
     private Board tablero;
@@ -91,7 +94,7 @@ public class Client extends Thread{
 			boolean keepPlaying = true;
             while(keepPlaying){
 				Random random = new Random();
-			    int posx = random.nextInt(w - w/4)+ w/4;
+			    int posx = random.nextInt(w - margin_Border - w/4)+ w/4 + margin_Border;
 			    int posy = random.nextInt(h);
 			    System.out.println( posx  + " - " +  posy);
 			    player = new Player(new Point(posx, posy),id);
@@ -100,11 +103,17 @@ public class Client extends Thread{
 			    int skipFrames = 0;
 
 			    while(!remotePoints.allPlayersReady()){
-			        continue;//sleep(100);
+			        continue;
 			    }
+				try {
+				    this.sleep(1000);
+				} catch (InterruptedException ex) {
+
+				}
+				remotePoints.setReady(id,false);
 
 			    while (true) { // Main loop
-					System.out.println("while true");	
+					
 			        // Controls
 			        if(!player.ended){
 			            if (keys[KeyEvent.VK_UP]) {
@@ -151,6 +160,7 @@ public class Client extends Thread{
 
 			    	// Tablero
 			    	boolean aux=true;
+					
 					while(aux){
 					    try {
 					        // Pass the points to the board
@@ -160,10 +170,11 @@ public class Client extends Thread{
 					        player.score = remotePoints.getScore(player.id);
 
 					        if(tablero.points[id].size()==0){
-					            player.ended=true;
+					            player.ended = true;
+
 					        }
 					        tablero.repaint();//paint the points in the board
-					        aux=false;
+					        aux = false;
 					    }catch(java.rmi.UnmarshalException e){
 					        //TODO print sometring??
 					        System.out.println("wait");
@@ -180,21 +191,26 @@ public class Client extends Thread{
 				
 				tablero.repaint();//paint the points in the board}
 				System.out.println("waiting for key Up to continue, down to finish");			
-				remotePoints.setReady(id,false);
+				
 				while(true){//wainting for players to decide	
-		
+					try {
+					    this.sleep(1000 / UPDATE_RATE);
+					} catch (InterruptedException ex) {
+						ex.printStackTrace();
+					}
 					if (keys[KeyEvent.VK_UP]) {
 					    System.out.println("UP");
-						keepPlaying=true;
+						keepPlaying = true;
 						remotePoints.setReady(id,true);
 						break;
 					}
 					if (keys[KeyEvent.VK_DOWN]) {
 						System.out.println("DOWN");
-						keepPlaying=false;
+						keepPlaying = false;
 						remotePoints.setReady(id,true);
 						break;
 					}
+					
 				}
 				System.out.println("end");	
 

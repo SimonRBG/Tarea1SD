@@ -143,6 +143,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     public void setReady(int id, boolean r) throws RemoteException{
 	ready[id]=r;
+	looses[id] = false;
     }
 
     private void notifyOperation(String s){
