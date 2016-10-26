@@ -104,6 +104,7 @@ public class Client extends Thread{
 			    }
 
 			    while (true) { // Main loop
+					System.out.println("while true");	
 			        // Controls
 			        if(!player.ended){
 			            if (keys[KeyEvent.VK_UP]) {
@@ -176,7 +177,10 @@ public class Client extends Thread{
 					}
 				}//end while True
 				//TODO press up to keep playing, down to stop playing
-				while(true){//wainting for players to decide				
+				
+				tablero.repaint();//paint the points in the board
+				while(true){//wainting for players to decide	
+					System.out.println("waiting for key");			
 					if (keys[KeyEvent.VK_UP]) {
 					    System.out.println("UP");
 						keepPlaying=true;
@@ -188,6 +192,7 @@ public class Client extends Thread{
 						break;
 					}
 				}
+				System.out.println("end");	
 
 	    	}//end while keep playing
         } catch (NotBoundException e) {
