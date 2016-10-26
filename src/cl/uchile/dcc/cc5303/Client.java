@@ -115,7 +115,13 @@ public class Client extends Thread{
 			                player.moveDown();
 			        	}
 
-			    	}
+			    	}else{
+						boolean allLost = remotePoints.allLost();
+						if(allLost){
+							System.out.println("allLost");
+							break;	//break while true						
+						}
+					}
 					++frames;
 
 					if (frames == GROW_RATE){
@@ -132,12 +138,7 @@ public class Client extends Thread{
 					            new_point = player.growUp(true);
 					            // Add the new point
 					            remotePoints.addPoint(new_point, id);
-					        }else{
-								boolean allLost = remotePoints.allLost();
-								if(allLost)
-									break;	//break while true						
 							}
-
 					        if(random.nextFloat()< 0.1){
 					            skipFrames = 2 + random.nextInt(4);
 					            System.out.println(skipFrames);

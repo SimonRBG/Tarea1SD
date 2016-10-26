@@ -54,6 +54,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             notifyOperation("player "+i+" lost!!");
 	    if(checkAllPlayers()){
 		this.allLost=true;
+		notifyOperation("all Lost");
 		//TODO borrar todo y empezar de nuevo	
 	    }
         }
