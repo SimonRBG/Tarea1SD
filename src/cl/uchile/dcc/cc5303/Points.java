@@ -23,6 +23,8 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     boolean allLost;
     int w, h;
 
+    Object mutex = new Object();
+
     Stack ids = new Stack();
 
     boolean ready[];
@@ -45,35 +47,42 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     public void addPoint(IPoint po, int i) throws RemoteException{
+        if (po==null)
+            return;
         // If the point doesn't choc with another one
-        if (check(po)) {
-            list[i].add(po);
-        }
-        else{
-            // Clear all the snake, save tha it lost and telling to the other to update their score
-            list[i].clear();
-            this.looses[i] = true;
-            notify_score(i);
-            notifyOperation("player "+i+" lost!!");
-	    if(checkAllPlayers()){
-		this.allLost=true;
-		notifyOperation("all Lost");
-		//TODO borrar todo y empezar de nuevo	
-	    }
+        synchronized (mutex) {
+            if (check(po)) {
+                list[i].add(po);
+            } else {
+                // Clear all the snake, save tha it lost and telling to the other to update their score
+                list[i].clear();
+                this.looses[i] = true;
+                notify_score(i);
+                notifyOperation("player " + i + " lost!!");
+                if (checkAllPlayers()) {
+                    this.allLost = true;
+                    notifyOperation("all Lost");
+                    //TODO borrar todo y empezar de nuevo
+                }
+            }
         }
         notifyOperation("new Point Added"+po.getX()+", "+po.getY()+", "+po.getVisible()+". id: "+i);
     }
 	
     public boolean allLost() throws RemoteException{
-	return this.allLost;
+        synchronized (mutex) {
+            return this.allLost;
+        }
     }
 
     private boolean checkAllPlayers(){
-	for (int i = 0; i < this.numplayers; i++){
-	    if(!this.looses[i])
-		return false;
-	}
-	return true;
+        synchronized (mutex) {
+            for (int i = 0; i < this.numplayers; i++) {
+                if (!this.looses[i])
+                    return false;
+            }
+            return true;
+        }
     }
 
     private boolean check(IPoint p) throws RemoteException {
@@ -101,49 +110,65 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException {
-        notifyOperation("getList");
-        return list.clone();
+        synchronized (mutex) {
+            notifyOperation("getList");
+            return list.clone();
+        }
     }
 
     public void notify_score(int id) throws RemoteException {
         // Update the score of all the others snakes alive
-        for (int i = 0; i < numplayers; i++) {
-            if (i != id && !this.looses[i])
-                scores[i]++;
+        synchronized (mutex) {
+            for (int i = 0; i < numplayers; i++) {
+                if (i != id && !this.looses[i])
+                    scores[i]++;
+            }
         }
     }
 
     public int getScore(int id) throws RemoteException {
-        return scores[id];
+        synchronized (mutex) {
+            return scores[id];
+        }
     }
 
     public int[] getScores() throws RemoteException {
-        return scores;
+        synchronized (mutex) {
+            return scores;
+        }
     }
 
     public int getNumPlayers() throws RemoteException {
-        return numplayers;
+        synchronized (mutex) {
+            return numplayers;
+        }
     }
 
     // Gave a new id for 5 users
     public int getId() throws RemoteException{
-        int id = (int)ids.peek();
-        notifyOperation("new id "+id);
-	ready[id]=true;        
-        return (int)ids.pop();
+        synchronized (mutex) {
+            int id = (int) ids.peek();
+            notifyOperation("new id " + id);
+            ready[id] = true;
+            return (int) ids.pop();
+        }
     }
 
     public boolean allPlayersReady() throws RemoteException{
-	for (int i = 0; i < numplayers; i++) {
-            if(!ready[i])
-		return false;
+        synchronized (mutex) {
+            for (int i = 0; i < numplayers; i++) {
+                if (!ready[i])
+                    return false;
+            }
+            return true;
         }
-        return true;
     }
 
     public void setReady(int id, boolean r, boolean l) throws RemoteException{
-	ready[id]=r;
-	looses[id] = l;
+        synchronized (mutex) {
+            ready[id] = r;
+            looses[id] = l;
+        }
     }
 
     private void notifyOperation(String s){

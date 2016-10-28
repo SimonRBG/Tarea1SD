@@ -29,13 +29,17 @@ public class Player {
     }
 
     public Point growUp(boolean visibility) throws RemoteException {
-        //Point head = this.body.get(this.body.size() - 1);
-        int x = (int) (head.x + Point.dHip*Math.cos(Math.toRadians(this.angle)));
-        int y = (int) (head.y + Point.dHip*Math.sin(Math.toRadians(this.angle)));
+        if(!this.ended) {
+            //Point head = this.body.get(this.body.size() - 1);
+            int x = (int) (head.x + Point.dHip * Math.cos(Math.toRadians(this.angle)));
+            int y = (int) (head.y + Point.dHip * Math.sin(Math.toRadians(this.angle)));
 
-        head = new Point(x,y, visibility);
-        // Update values for himself and tell it to the server
-        return head;
+            head = new Point(x, y, visibility);
+            // Update values for himself and tell it to the server
+            return head;
+        }
+        return null;
+
     }
 
     @Override

@@ -8,8 +8,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Random;
 
 public class Client extends Thread{
@@ -89,10 +87,9 @@ public class Client extends Thread{
             try{
                 id = remotePoints.getId();
             }catch(Exception e){
-                e.printStackTrace();
-                //TODO if not id-> no puede jugar pq ya hay 5 jugadores
+				System.out.println("Límite de jugadores Alcanzado!!");
+				return;
             }
-
 
             // Player Initial position
             // Handle score border
@@ -108,6 +105,7 @@ public class Client extends Thread{
 			    int skipFrames = 0;
 
 			    while(!remotePoints.allPlayersReady()){
+					tablero.drawString("Waiting For other players...");
 			        continue;
 			    }
 				try {
@@ -120,17 +118,16 @@ public class Client extends Thread{
 			    while (true) { // Main loop
 					
 			        // Controls
-			        if(!player.ended){
-			            if (keys[KeyEvent.VK_UP]) {
-			                System.out.println("UP");
-			                player.moveUp();
-			            }
-			            if (keys[KeyEvent.VK_DOWN]) {
-			                System.out.println("DOWN");
-			                player.moveDown();
-			        	}
-
-			    	}else{
+			        if(!player.ended) {
+						if (keys[KeyEvent.VK_UP]) {
+							System.out.println("UP");
+							player.moveUp();
+						}
+						if (keys[KeyEvent.VK_DOWN]) {
+							System.out.println("DOWN");
+							player.moveDown();
+						}
+					}else{
 						boolean allLost = remotePoints.allLost();
 						if(allLost){
 							System.out.println("allLost");
@@ -142,50 +139,37 @@ public class Client extends Thread{
 					if (frames == GROW_RATE){
 					    Point new_point = null;
 					    if (skipFrames-- > 0){
-					        if (!player.ended) {
-					            new_point = player.growUp(false);//returns the new point
-					            remotePoints.addPoint(new_point, id);//add the new point
-					        }
+							new_point = player.growUp(false);//returns the new point
+
 					    }else {
 					        skipFrames = 0;
-					        if (!player.ended) {
 					            // Returns the new point
-					            new_point = player.growUp(true);
-					            // Add the new point
-					            remotePoints.addPoint(new_point, id);
-							}
+							new_point = player.growUp(true);
 					        if(random.nextFloat()< 0.1){
 					            skipFrames = 2 + random.nextInt(4);
-					            System.out.println(skipFrames);
 					        }
 					    }
-
+						remotePoints.addPoint(new_point, id);
 					    frames = 0;
 					}
-
 			    	// Tablero
-			    	boolean aux=true;
-					
-					while(aux){
-					    try {
-					        // Pass the points to the board
-					        tablero.points = remotePoints.getList();
-					        // Obtaining the scores for drawing
-					        tablero.scores = remotePoints.getScores();
-					        player.score = remotePoints.getScore(player.id);
+			    	//boolean aux = true;
+					//while(aux){
 
-					        if(tablero.points[id].size()==0){
-					            player.ended = true;
+					// Pass the points to the board
+					tablero.points = remotePoints.getList();
+					// Obtaining the scores for drawing
+					tablero.scores = remotePoints.getScores();
 
-					        }
-					        tablero.repaint();//paint the points in the board
-					        aux = false;
-					    }catch(java.rmi.UnmarshalException e){
-					        //TODO print sometring??
-					        System.out.println("wait");
-					        continue;
-			        	}
-			    	}
+					player.score = tablero.scores[player.id];
+					if(tablero.points[id].size() == 0){
+						player.ended = true;
+					}
+					tablero.repaint();//paint the points in the board=
+
+					//aux = false;
+
+			    	//}
 					try {
 					    this.sleep(1000 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
@@ -194,40 +178,37 @@ public class Client extends Thread{
 				}//end while True
 
                 remotePoints.setReady(id,false,true);
-				//TODO press up to keep playing, down to stop playing
 
                 try {
-                    this.sleep(500);
+                    this.sleep(1000);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
-				tablero.repaint();//paint the points in the board}
+				tablero.points = remotePoints.getList();
 				System.out.println("waiting for key Y to continue, N to finish");
-
-                while(true){//wainting for players to decide
+				tablero.wait=true;
+				tablero.repaint();//paint the points in the board
+                while(true) {//wainting for players to decide
 					try {
-					    this.sleep(1000 / UPDATE_RATE);
+						this.sleep(1000 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
 						ex.printStackTrace();
 					}
 					if (keys[KeyEvent.VK_Y]) {
-					    System.out.println("Waiting for other players to answer");
+						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
-						remotePoints.setReady(id,true, false);
+						remotePoints.setReady(id, true, false);
 						break;
 					}
 					if (keys[KeyEvent.VK_N]) {
 						System.out.println("bye-bye");
 						keepPlaying = false;
-						remotePoints.setReady(id,true, true);
+						remotePoints.setReady(id, true, true);
 						break;
 					}
 				}
-				System.out.println("end");	
-
+				tablero.wait = false;
 	    	}
-            System.out.println("I'm out");
-
 
             //end while keep playing
         } catch (NotBoundException e) {
@@ -239,7 +220,7 @@ public class Client extends Thread{
         }
 
         try {
-            System.out.println("I'm finalizing");
+        	//Close game
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             this.finalize();
         }catch(java.lang.Throwable e){

@@ -14,6 +14,7 @@ public class Board extends Canvas{
     public LinkedHashSet<IPoint> points[];
     public int scores[];
     public int numplayers;
+    public boolean wait;
 
     // doble buffer para dibujar
     public Image img;
@@ -47,10 +48,15 @@ public class Board extends Canvas{
 
 
         // dibujar elementos del juego
-        draw(points, scores, numplayers);
 
+
+        draw(points, scores, numplayers);
+        if(this.wait){
+            drawString("Press Y to continue, N to finish");
+        }
         graphics.drawImage(img, 0, 0, null);
         graphics.drawImage(score_board, 0, 0, null);
+
 
     }
 
@@ -102,4 +108,9 @@ public class Board extends Canvas{
         }
 
     }
+    public void drawString(String s) {
+        buffer.drawString(s, width/3, height/2);
+        //buffer.drawImage(img, 0, 0, null);
+    }
+
 }

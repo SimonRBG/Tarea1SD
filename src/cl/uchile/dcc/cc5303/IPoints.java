@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
 
 public interface IPoints extends Remote{
 
-    public void addPoint(IPoint po, int i) throws RemoteException;
+    public  void addPoint(IPoint po, int i) throws RemoteException;
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException;
 
