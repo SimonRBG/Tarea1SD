@@ -100,7 +100,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             //Check other points
             while (it.hasNext()) {
                 IPoint p2 = (IPoint) it.next();
-                if ( abs(px- p2.getX()) < Point.dHip/2 && abs(py - p2.getY())<Point.dHip/2  && (p2.getVisible() == pv && pv)) {
+                if ( abs(px- p2.getX()) < Point.dHip/3*2 && abs(py - p2.getY())<Point.dHip/3*2  && (p2.getVisible() == pv && pv)) {
                     return false;
                 }
                 it.remove();

@@ -14,6 +14,7 @@ public class Player {
     public int score;
 
     public Player(Point point, int id) {
+        this.angle = 0;
         this.ended = false;
         this.head = point;
         this.id = id;
@@ -46,6 +47,5 @@ public class Player {
     public String toString() {
         return this.angle + " " + this.head.x + " " + this.head.y;
     }
-
 
 }

@@ -12,7 +12,7 @@ import java.rmi.registry.LocateRegistry;
 
 
 public class Server {
-    public static final String URL_SERVER = "rmi://10.0.115.47:1099/zatackaServer";
+    //public static String URL_SERVER = "rmi://ip:1099/zatackaServer";
     public static final int w = 400, h = 300;
 
 
@@ -25,6 +25,9 @@ public class Server {
 
             String ip = Util.getIp();
             System.out.println("serversIP: "+ip);
+            String URL_SERVER = "rmi://ip:1099/zatackaServer";
+            URL_SERVER=URL_SERVER.replace("ip",ip);
+            System.out.println(URL_SERVER);
 
             // Line to solve rmiregistry Bug
             String hostname = ip;

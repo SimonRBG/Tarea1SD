@@ -127,67 +127,68 @@ public class Client extends Thread{
 							System.out.println("DOWN");
 							player.moveDown();
 						}
-					}else{
+
+						++frames;
+
+						if (frames == GROW_RATE){
+							Point new_point = null;
+							if (skipFrames-- > 0){
+								new_point = player.growUp(false);//returns the new point
+
+							}else {
+								skipFrames = 0;
+								// Returns the new point
+								new_point = player.growUp(true);
+								if(random.nextFloat()< 0.1){
+									skipFrames = 2 + random.nextInt(4);
+								}
+							}
+							remotePoints.addPoint(new_point, id);
+							frames = 0;
+						}
+
+					}
+					if(player.ended){
 						boolean allLost = remotePoints.allLost();
 						if(allLost){
 							System.out.println("allLost");
 							break;	//break while true						
 						}
 					}
-					++frames;
 
-					if (frames == GROW_RATE){
-					    Point new_point = null;
-					    if (skipFrames-- > 0){
-							new_point = player.growUp(false);//returns the new point
-
-					    }else {
-					        skipFrames = 0;
-					            // Returns the new point
-							new_point = player.growUp(true);
-					        if(random.nextFloat()< 0.1){
-					            skipFrames = 2 + random.nextInt(4);
-					        }
-					    }
-						remotePoints.addPoint(new_point, id);
-					    frames = 0;
-					}
 			    	// Tablero
-			    	//boolean aux = true;
-					//while(aux){
 
-					// Pass the points to the board
-					tablero.points = remotePoints.getList();
+
 					// Obtaining the scores for drawing
 					tablero.scores = remotePoints.getScores();
-
 					player.score = tablero.scores[player.id];
+					// Pass the points to the board
+					tablero.points = remotePoints.getList();
 					if(tablero.points[id].size() == 0){
 						player.ended = true;
 					}
 					tablero.repaint();//paint the points in the board=
-
 					//aux = false;
-
 			    	//}
 					try {
 					    this.sleep(1000 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
                         ex.printStackTrace();
 					}
-				}//end while True
+				}
 
-                remotePoints.setReady(id,false,true);
-
+				remotePoints.setReady(id,false,true);
                 try {
                     this.sleep(1000);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
-				tablero.points = remotePoints.getList();
-				System.out.println("waiting for key Y to continue, N to finish");
+
+                System.out.println("waiting for key Y to continue, N to finish");
+                tablero.points = remotePoints.getList();
 				tablero.wait=true;
 				tablero.repaint();//paint the points in the board
+				player.ended=false;
                 while(true) {//wainting for players to decide
 					try {
 						this.sleep(1000 / UPDATE_RATE);
