@@ -4,15 +4,17 @@ package cl.uchile.dcc.cc5303;
  * Created by pecesito on 12-10-16.
  */
 
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 
+
+
 public class Server {
-    public static final String URL_SERVER = "rmi://172.17.69.196:1099/zatackaServer";
+    public static final String URL_SERVER = "rmi://10.0.115.47:1099/zatackaServer";
     public static final int w = 400, h = 300;
+
 
 
     public static void main(String[] args) {
@@ -20,8 +22,12 @@ public class Server {
         IPoints points;
 
         try{
+
+            String ip = Util.getIp();
+            System.out.println("serversIP: "+ip);
+
             // Line to solve rmiregistry Bug
-            String hostname = "172.17.69.196";
+            String hostname = ip;
             System.setProperty("java.rmi.server.hostname", hostname);
 
             // Parsing of the argument to launch with -n option

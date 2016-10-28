@@ -141,9 +141,9 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         return true;
     }
 
-    public void setReady(int id, boolean r) throws RemoteException{
+    public void setReady(int id, boolean r, boolean l) throws RemoteException{
 	ready[id]=r;
-	looses[id] = false;
+	looses[id] = l;
     }
 
     private void notifyOperation(String s){

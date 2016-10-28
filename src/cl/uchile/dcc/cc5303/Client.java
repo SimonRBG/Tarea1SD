@@ -3,6 +3,7 @@ package cl.uchile.dcc.cc5303;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -32,8 +33,10 @@ public class Client extends Thread{
     private Player player;
 
     private int id;
+    private String url_server;
 
-    public Client() {
+    public Client(String url) {
+        this.url_server=url;
         try {
 	    w = Server.w;
 	    h = Server.h;
@@ -46,6 +49,7 @@ public class Client extends Thread{
 
             frame.add(tablero);
             tablero.setSize(Server.w, Server.h);
+
 
             frame.pack();
             frame.addKeyListener(new KeyListener() {
@@ -73,14 +77,15 @@ public class Client extends Thread{
     @Override
     public void run() {
         try {
-
-            String hostname = "172.17.69.196";
+            String ip = Util.getIp();
+            System.out.println("my IP: "+ ip);
+            String hostname = ip;
             System.setProperty("java.rmi.server.hostname", hostname);
 
             // Recuperation of the shared object
-            remotePoints = (IPoints) Naming.lookup(Server.URL_SERVER);
+            remotePoints = (IPoints) Naming.lookup(url_server);
             this.tablero.numplayers = remotePoints.getNumPlayers();
-            System.out.println(Server.URL_SERVER);
+            System.out.println(url_server);
             try{
                 id = remotePoints.getId();
             }catch(Exception e){
@@ -108,9 +113,9 @@ public class Client extends Thread{
 				try {
 				    this.sleep(1000);
 				} catch (InterruptedException ex) {
-
+                    ex.printStackTrace();
 				}
-				remotePoints.setReady(id,false);
+
 
 			    while (true) { // Main loop
 					
@@ -184,42 +189,60 @@ public class Client extends Thread{
 					try {
 					    this.sleep(1000 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
-
+                        ex.printStackTrace();
 					}
 				}//end while True
+
+                remotePoints.setReady(id,false,true);
 				//TODO press up to keep playing, down to stop playing
-				
+
+                try {
+                    this.sleep(500);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
 				tablero.repaint();//paint the points in the board}
-				System.out.println("waiting for key Up to continue, down to finish");			
-				
-				while(true){//wainting for players to decide	
+				System.out.println("waiting for key Y to continue, N to finish");
+
+                while(true){//wainting for players to decide
 					try {
 					    this.sleep(1000 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
 						ex.printStackTrace();
 					}
-					if (keys[KeyEvent.VK_UP]) {
-					    System.out.println("UP");
+					if (keys[KeyEvent.VK_Y]) {
+					    System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
-						remotePoints.setReady(id,true);
+						remotePoints.setReady(id,true, false);
 						break;
 					}
-					if (keys[KeyEvent.VK_DOWN]) {
-						System.out.println("DOWN");
+					if (keys[KeyEvent.VK_N]) {
+						System.out.println("bye-bye");
 						keepPlaying = false;
-						remotePoints.setReady(id,true);
+						remotePoints.setReady(id,true, true);
 						break;
 					}
-					
 				}
 				System.out.println("end");	
 
-	    	}//end while keep playing
+	    	}
+            System.out.println("I'm out");
+
+
+            //end while keep playing
         } catch (NotBoundException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            System.out.println("I'm finalizing");
+            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            this.finalize();
+        }catch(java.lang.Throwable e){
             e.printStackTrace();
         }
     }
