@@ -46,7 +46,7 @@ public class Client extends Thread{
             tablero = new Board(w, h);
 
             frame.add(tablero);
-            tablero.setSize(Server.w, Server.h);
+            tablero.setSize(w, h);
 
 
             frame.pack();
@@ -65,12 +65,11 @@ public class Client extends Thread{
                     keys[e.getKeyCode()] = false;
                 }
             });
+
         }  catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
 
     @Override
     public void run() {
@@ -90,7 +89,6 @@ public class Client extends Thread{
 				System.out.println("Límite de jugadores Alcanzado!!");
 				return;
             }
-
             // Player Initial position
             // Handle score border
 			boolean keepPlaying = true;
@@ -103,31 +101,26 @@ public class Client extends Thread{
 
 			    int frames = 2;
 			    int skipFrames = 0;
-
+				//set me ready
+				remotePoints.setReady(id,true,false);
+				//wait for others
 			    while(!remotePoints.allPlayersReady()){
-					tablero.drawString("Waiting For other players...");
 			        continue;
 			    }
-				try {
-				    this.sleep(1000);
-				} catch (InterruptedException ex) {
-                    ex.printStackTrace();
-				}
-
-
-			    while (true) { // Main loop
-					
+				System.out.println("All Players Ready!");
+				tablero.wait = false;
+				// Main loop
+			    while (true) {
 			        // Controls
-			        if(!player.ended) {
+			        if(!player.ended){
 						if (keys[KeyEvent.VK_UP]) {
-							System.out.println("UP");
+							//System.out.println("UP");
 							player.moveUp();
 						}
 						if (keys[KeyEvent.VK_DOWN]) {
-							System.out.println("DOWN");
+							//System.out.println("DOWN");
 							player.moveDown();
 						}
-
 						++frames;
 
 						if (frames == GROW_RATE){
@@ -146,55 +139,42 @@ public class Client extends Thread{
 							remotePoints.addPoint(new_point, id);
 							frames = 0;
 						}
-
-					}
-					if(player.ended){
-						boolean allLost = remotePoints.allLost();
-						if(allLost){
-							System.out.println("allLost");
-							break;	//break while true						
-						}
 					}
 
 			    	// Tablero
-
-
 					// Obtaining the scores for drawing
 					tablero.scores = remotePoints.getScores();
 					player.score = tablero.scores[player.id];
 					// Pass the points to the board
 					tablero.points = remotePoints.getList();
-					if(tablero.points[id].size() == 0){
-						player.ended = true;
-					}
+					player.ended = remotePoints.lost(id);
+
 					tablero.repaint();//paint the points in the board=
-					//aux = false;
-			    	//}
+
+					if(player.ended){
+						if(remotePoints.allLost()){
+							System.out.println("allLost");
+							break;	//break while true
+						}
+						else{
+							System.out.println("stillAlive"+id);
+						}
+					}
+
 					try {
-					    this.sleep(1000 / UPDATE_RATE);
+					    this.sleep(100 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
                         ex.printStackTrace();
 					}
 				}
 
 				remotePoints.setReady(id,false,true);
-                try {
-                    this.sleep(1000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-
-                System.out.println("waiting for key Y to continue, N to finish");
-                tablero.points = remotePoints.getList();
-				tablero.wait=true;
+                System.out.println("waiting for key: Y to continue, N to finish");
+				tablero.points = null;
+				tablero.press=true;
 				tablero.repaint();//paint the points in the board
-				player.ended=false;
+
                 while(true) {//wainting for players to decide
-					try {
-						this.sleep(1000 / UPDATE_RATE);
-					} catch (InterruptedException ex) {
-						ex.printStackTrace();
-					}
 					if (keys[KeyEvent.VK_Y]) {
 						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
@@ -207,8 +187,16 @@ public class Client extends Thread{
 						remotePoints.setReady(id, true, true);
 						break;
 					}
+					try {
+						this.sleep(1000 / UPDATE_RATE);
+					} catch (InterruptedException ex) {
+						ex.printStackTrace();
+					}
 				}
-				tablero.wait = false;
+
+				tablero.press = false;
+				tablero.wait = true;
+				tablero.repaint();//paint the points in the board
 	    	}
 
             //end while keep playing
@@ -219,7 +207,14 @@ public class Client extends Thread{
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
+		tablero.wait = false;
+		tablero.bye = true;
+		tablero.repaint();//paint the points in the board
+		try {
+			this.sleep(1000);
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		}
         try {
         	//Close game
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));

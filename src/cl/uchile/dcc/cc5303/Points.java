@@ -12,7 +12,6 @@ import java.util.Stack;
 
 import static java.lang.Math.abs;
 
-
 public class Points extends UnicastRemoteObject  implements IPoints {
 
     int numplayers;
@@ -35,12 +34,13 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         this.scores = new int[n];
         this.looses = new boolean[n];
         this.ready = new boolean[n];
-	this.allLost = false;
+	    this.allLost = false;
         this.numplayers = n;
         list = new LinkedHashSet[n];
         for(int i = 0; i<n; i++) {
             this.looses[i] = false;
-	    this.ready[i] = false;
+	        this.ready[i] = false;
+            this.scores[i] = 0;
             list[i] = new LinkedHashSet<IPoint>();
             ids.push(n-1-i);
         }
@@ -68,12 +68,20 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
         notifyOperation("new Point Added"+po.getX()+", "+po.getY()+", "+po.getVisible()+". id: "+i);
     }
-	
+
+    public boolean lost(int id)throws RemoteException{
+        synchronized (mutex) {
+            return looses[id];
+        }
+    }
+
     public boolean allLost() throws RemoteException{
         synchronized (mutex) {
             return this.allLost;
         }
     }
+
+
 
     private boolean checkAllPlayers(){
         synchronized (mutex) {
@@ -149,7 +157,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         synchronized (mutex) {
             int id = (int) ids.peek();
             notifyOperation("new id " + id);
-            ready[id] = true;
             return (int) ids.pop();
         }
     }
@@ -168,6 +175,9 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         synchronized (mutex) {
             ready[id] = r;
             looses[id] = l;
+            if(!l){
+                allLost = false;
+            }
         }
     }
 
