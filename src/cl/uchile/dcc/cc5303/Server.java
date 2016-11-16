@@ -74,6 +74,11 @@ public class Server extends Thread{
                 //    charge_CPU = bean.getSystemLoadAverage();
                  //   System.out.println("CPU charge : " + charge_CPU);
                 //}
+                // First step : First reason to migrate
+                if (charge_CPU > 0.75) {
+                    // then migrate to another server
+                    c.setMigrating(true);
+                }
             }
           }catch (RemoteException e){
             e.printStackTrace();
