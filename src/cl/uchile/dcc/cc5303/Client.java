@@ -18,6 +18,7 @@ public class Client extends Thread{
     public boolean[] keys;
     private final static String TITLE = "Juego - CC5303";
     public static IPoints remotePoints;
+	public static IComm comm;
 
     private int w, h;
     private final static int UPDATE_RATE = 30;
@@ -31,10 +32,11 @@ public class Client extends Thread{
     private Player player;
 
     private int id;
-    private String url_server;
+    private String url_server, url_coordinator;
 
-    public Client(String url) {
-        this.url_server=url;
+    public Client(String url_c) {
+    	this.url_coordinator = url_c;
+        //this.url_server=url_c;
         try {
 	    w = Server.w;
 	    h = Server.h;
@@ -79,9 +81,23 @@ public class Client extends Thread{
             String hostname = ip;
             System.setProperty("java.rmi.server.hostname", hostname);
 
-            // Recuperation of the shared object
+
+			//recuperation of the coordinator Object(Comm)
+			comm = (IComm) Naming.lookup(url_coordinator);
+			while(!comm.getServer_ready()){
+				//wait
+				try {
+					this.sleep(1000 / UPDATE_RATE);
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+			}
+			System.out.println("ServerReady");
+			url_server= comm.getActual_url_server();
+			// Recuperation of the shared object
             remotePoints = (IPoints) Naming.lookup(url_server);
-            this.tablero.numplayers = remotePoints.getNumPlayers();
+
+			this.tablero.numplayers = remotePoints.getNumPlayers();
             System.out.println(url_server);
             try{
                 id = remotePoints.getId();
