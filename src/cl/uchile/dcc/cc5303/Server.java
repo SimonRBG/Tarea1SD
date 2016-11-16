@@ -9,7 +9,8 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-
+import java.lang.management.ManagementFactory;
+import com.sun.management.OperatingSystemMXBean;
 
 
 public class Server extends Thread{
@@ -23,15 +24,13 @@ public class Server extends Thread{
     String ip_coord;
     String port_coord;
 
-
-
     int num_players;
     int portint;
     IPoints points;
 
 
     static IComm c;
-
+    double charge_CPU;
 
     public Server(int n, String pc, String ipc){
         ip = Util.getIp();
@@ -54,9 +53,29 @@ public class Server extends Thread{
             System.out.println("Objeto points publicado en: " + url_server);
 
             c.setServer_ready(true);
-            
 
-        }catch (RemoteException e){
+            com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            while (true) {
+                if (bean == null)
+                    throw new NullPointerException("Unable to collect operating system metrics, jmx bean is null");
+
+                try {
+                    // We sleep to not surcharge the server's CPU charge
+                    this.sleep(1000);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                // TODO : Test on Linux if the same Method works
+                // if (bean.getName().contains("Windows")) {
+                    charge_CPU = bean.getSystemCpuLoad();
+                    System.out.println("CPU charge : " + charge_CPU);
+                // }
+                //else {
+                //    charge_CPU = bean.getSystemLoadAverage();
+                 //   System.out.println("CPU charge : " + charge_CPU);
+                //}
+            }
+          }catch (RemoteException e){
             e.printStackTrace();
         }catch (MalformedURLException e){
             e.printStackTrace();
