@@ -79,7 +79,7 @@ public class Server extends Thread{
                     // then migrate to another server
 
                     c.setMigrating(true);
-                    c.migrate();
+
                     System.exit(0);
                 }
             }
@@ -92,7 +92,7 @@ public class Server extends Thread{
 
     public static void main(String[] args){
         int n = 2;
-        String p = "60001";
+        String p = "60002";
         String pc = "60000";
         String ipc = Util.getIp();
         for (int i = 0; i < args.length; i++) {
@@ -129,7 +129,7 @@ public class Server extends Thread{
 
             while(true){
 
-                if(c.getActual_url_server().compareTo(s.url_server)==0){
+                if(c.getActual_url_server().compareTo(s.url_server)==0 && !c.getMigrating()){
                     System.out.println("1");
                     if(!c.getServer_ready()){
                         System.out.println("2");
