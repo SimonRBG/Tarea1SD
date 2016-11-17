@@ -32,9 +32,9 @@ public class Server extends Thread{
     static IComm c;
     double charge_CPU;
 
-    public Server(int n, String pc, String ipc){
+    public Server(int n, String pc, String ipc, String p){
         ip = Util.getIp();
-        port = "1099";
+        port = p;
         url_server = url_server.replace("ip",ip);
         url_server = url_server.replace("port",port);
         num_players = n;
@@ -78,6 +78,7 @@ public class Server extends Thread{
                 if (charge_CPU > 0.75) {
                     // then migrate to another server
                     c.setMigrating(true);
+                    System.exit(0);
                 }
             }
           }catch (RemoteException e){
@@ -116,7 +117,7 @@ public class Server extends Thread{
         }
 
         //s.start();
-        Server s = new Server(n, pc, ipc);
+        Server s = new Server(n, pc, ipc, p);
         String url_coordinator = "rmi://ip:port/zatackaCoordinator";
         url_coordinator = url_coordinator.replace("port",pc).replace("ip", ipc);
         try{
