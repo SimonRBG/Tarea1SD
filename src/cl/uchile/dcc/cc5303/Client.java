@@ -36,7 +36,7 @@ public class Client extends Thread{
 
     public Client(String url_c) {
     	this.url_coordinator = url_c;
-        //this.url_server=url_c;
+        this.url_server=url_c;
         try {
 	    w = Server.w;
 	    h = Server.h;
@@ -73,6 +73,33 @@ public class Client extends Thread{
         }
     }
 
+
+    public void waitMigrating(){
+		try {
+			while(comm.getMigrating()){
+				try {
+					this.sleep(1000 / UPDATE_RATE);
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+			}
+			String newUrl = comm.getActual_url_server();
+
+			if (url_server != newUrl) {
+				url_server = newUrl;
+				remotePoints = (IPoints) Naming.lookup(url_server);
+
+			}
+		}catch (RemoteException e){
+			e.printStackTrace();
+		}catch(NotBoundException e){
+			e.printStackTrace();
+		}catch(MalformedURLException e){
+			e.printStackTrace();
+		}
+
+	}
+
     @Override
     public void run() {
         try {
@@ -93,13 +120,14 @@ public class Client extends Thread{
 				}
 			}
 			System.out.println("ServerReady");
-			url_server= comm.getActual_url_server();
+			waitMigrating();
 			// Recuperation of the shared object
             remotePoints = (IPoints) Naming.lookup(url_server);
-
+			waitMigrating();
 			this.tablero.numplayers = remotePoints.getNumPlayers();
             System.out.println(url_server);
             try{
+				waitMigrating();
                 id = remotePoints.getId();
             }catch(Exception e){
 				System.out.println("Límite de jugadores Alcanzado!!");
@@ -118,8 +146,10 @@ public class Client extends Thread{
 			    int frames = 2;
 			    int skipFrames = 0;
 				//set me ready
+				waitMigrating();
 				remotePoints.setReady(id,true,false);
 				//wait for others
+				waitMigrating();
 			    while(!remotePoints.allPlayersReady()){
 			        continue;
 			    }
@@ -152,6 +182,7 @@ public class Client extends Thread{
 									skipFrames = 2 + random.nextInt(4);
 								}
 							}
+							waitMigrating();
 							remotePoints.addPoint(new_point, id);
 							frames = 0;
 						}
@@ -159,15 +190,19 @@ public class Client extends Thread{
 
 			    	// Tablero
 					// Obtaining the scores for drawing
+					waitMigrating();
 					tablero.scores = remotePoints.getScores();
 					player.score = tablero.scores[player.id];
 					// Pass the points to the board
+					waitMigrating();
 					tablero.points = remotePoints.getList();
+					waitMigrating();
 					player.ended = remotePoints.lost(id);
 
 					tablero.repaint();//paint the points in the board=
 
 					if(player.ended){
+						waitMigrating();
 						if(remotePoints.allLost()){
 							System.out.println("allLost");
 							break;	//break while true
@@ -183,7 +218,7 @@ public class Client extends Thread{
                         ex.printStackTrace();
 					}
 				}
-
+				waitMigrating();
 				remotePoints.setReady(id,false,true);
                 System.out.println("waiting for key: Y to continue, N to finish");
 				tablero.points = null;
@@ -194,12 +229,14 @@ public class Client extends Thread{
 					if (keys[KeyEvent.VK_Y]) {
 						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
+						waitMigrating();
 						remotePoints.setReady(id, true, false);
 						break;
 					}
 					if (keys[KeyEvent.VK_N]) {
 						System.out.println("bye-bye");
 						keepPlaying = false;
+						waitMigrating();
 						remotePoints.setReady(id, true, true);
 						break;
 					}

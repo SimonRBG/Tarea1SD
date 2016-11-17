@@ -43,6 +43,7 @@ public class Server extends Thread{
         portint = Integer.parseInt(port);
         port_coord = pc;
         ip_coord = ipc;
+        System.setProperty("java.rmi.server.hostname", ip);
         try {
             LocateRegistry.createRegistry(portint);
             points = new Points(num_players, w, h);
@@ -56,7 +57,7 @@ public class Server extends Thread{
     }
     @Override
     public void run() {
-        System.setProperty("java.rmi.server.hostname", ip);
+
         try{
 
             System.out.println("Objeto points publicado en: " + url_server);

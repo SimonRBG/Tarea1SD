@@ -15,6 +15,7 @@ public class Coordinator {
         String ip = Util.getIp();
         int portint = Integer.parseInt(port);
         IComm c;
+        System.setProperty("java.rmi.server.hostname", ip);
         try{
             LocateRegistry.createRegistry(portint);
             c = new Comm(ip, port);
