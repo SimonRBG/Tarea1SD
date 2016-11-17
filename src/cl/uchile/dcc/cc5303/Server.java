@@ -95,7 +95,6 @@ public class Server extends Thread{
                         String url = c.getActual_url_server();
                         System.out.println(url);
                         IPoints p = (IPoints) Naming.lookup(url);
-                        Naming.
                         p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids);
                     } catch (NotBoundException e) {
                         e.printStackTrace();
