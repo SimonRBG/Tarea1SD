@@ -6,8 +6,13 @@ package cl.uchile.dcc.cc5303;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.LinkedHashSet;
+import java.util.Stack;
 
 public interface IPoints extends Remote{
+
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<IPoint>[] l, Stack ids)throws RemoteException;
+
+    public Points getPoints() throws RemoteException;
 
     public  void addPoint(IPoint po, int i) throws RemoteException;
 

@@ -10,6 +10,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.lang.management.ManagementFactory;
+import java.util.Stack;
+
 import com.sun.management.OperatingSystemMXBean;
 
 
@@ -41,14 +43,21 @@ public class Server extends Thread{
         portint = Integer.parseInt(port);
         port_coord = pc;
         ip_coord = ipc;
+        try {
+            LocateRegistry.createRegistry(portint);
+            points = new Points(num_players, w, h);
+            Naming.rebind(url_server, points);
+        }catch(RemoteException e){
+            e.printStackTrace();
+        }catch(MalformedURLException e){
+            e.printStackTrace();
+        }
+
     }
     @Override
     public void run() {
         System.setProperty("java.rmi.server.hostname", ip);
         try{
-            LocateRegistry.createRegistry(portint);
-            points = new Points(num_players, w, h);
-            Naming.rebind(url_server, points);
 
             System.out.println("Objeto points publicado en: " + url_server);
 
@@ -75,10 +84,23 @@ public class Server extends Thread{
                  //   System.out.println("CPU charge : " + charge_CPU);
                 //}
                 // First step : First reason to migrate
-                if (charge_CPU > 0.75) {
+                if (charge_CPU > 0.9) {
                     // then migrate to another server
 
                     c.setMigrating(true);
+
+                    try{
+                        Points mypoints = points.getPoints();
+                        String url = c.getActual_url_server();
+                        System.out.println(url);
+                        IPoints p = (IPoints) Naming.lookup(url);
+                        p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids);
+                    } catch (NotBoundException e) {
+                        e.printStackTrace();
+                    } catch (RemoteException e){
+                        e.printStackTrace();
+                        }
+                    c.setMigrating(false);
 
                     System.exit(0);
                 }
@@ -92,7 +114,7 @@ public class Server extends Thread{
 
     public static void main(String[] args){
         int n = 2;
-        String p = "60002";
+        String p = "60001";
         String pc = "60000";
         String ipc = Util.getIp();
         for (int i = 0; i < args.length; i++) {

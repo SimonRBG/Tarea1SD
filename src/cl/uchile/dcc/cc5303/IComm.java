@@ -2,11 +2,14 @@ package cl.uchile.dcc.cc5303;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.LinkedHashSet;
+import java.util.Stack;
 
 /**
  * Created by pecesito on 13-11-16.
  */
 public interface IComm extends Remote {
+
 
     public String getUrl_coordinator()throws RemoteException;
 

@@ -14,19 +14,19 @@ import static java.lang.Math.abs;
 
 public class Points extends UnicastRemoteObject  implements IPoints {
 
-    int numplayers;
+    public int numplayers;
     // We have to keep in mind the order
-    LinkedHashSet<IPoint> list[];
-    int scores[];
-    boolean looses[];
-    boolean allLost;
-    int w, h;
+    public LinkedHashSet<IPoint> list[];
+    public int scores[];
+    public boolean looses[];
+    public boolean allLost;
+    public int w, h;
 
-    Object mutex = new Object();
+    public Object mutex = new Object();
 
-    Stack ids = new Stack();
+    public Stack ids = new Stack();
 
-    boolean ready[];
+    public boolean ready[];
 
     public Points(int n, int w, int h) throws RemoteException{
 	    this.w=w;
@@ -44,6 +44,19 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             list[i] = new LinkedHashSet<IPoint>();
             ids.push(n-1-i);
         }
+    }
+
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<IPoint>[] l, Stack ids) throws RemoteException{
+        this.allLost=allLost;
+        this.list=l;
+        this.scores=scores;
+        this.looses=looses;
+        this.ready=ready;
+        this.ids=ids;
+    }
+
+    public Points getPoints() throws RemoteException{
+        return this;
     }
 
     public void addPoint(IPoint po, int i) throws RemoteException{

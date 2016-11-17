@@ -119,7 +119,6 @@ public class Comm extends UnicastRemoteObject implements IComm{
         server_ready = false;
         actual_url_server = new_server;
         notifyOperation("migrate");
-        setMigrating(false);
     }
 
     private void notifyOperation(String s){
