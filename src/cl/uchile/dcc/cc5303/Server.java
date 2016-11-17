@@ -85,7 +85,7 @@ public class Server extends Thread{
                  //   System.out.println("CPU charge : " + charge_CPU);
                 //}
                 // First step : First reason to migrate
-                if (charge_CPU > 0.9) {
+                if (charge_CPU > 0.75) {
                     // then migrate to another server
 
                     c.setMigrating(true);
@@ -95,6 +95,7 @@ public class Server extends Thread{
                         String url = c.getActual_url_server();
                         System.out.println(url);
                         IPoints p = (IPoints) Naming.lookup(url);
+                        Naming.
                         p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids);
                     } catch (NotBoundException e) {
                         e.printStackTrace();

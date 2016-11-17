@@ -71,6 +71,11 @@ public class Client extends Thread{
         }  catch (Exception e) {
             e.printStackTrace();
         }
+
+		String ip = Util.getIp();
+		System.out.println("my IP: "+ ip);
+		String hostname = ip;
+		System.setProperty("java.rmi.server.hostname", hostname);
     }
 
 
@@ -85,10 +90,12 @@ public class Client extends Thread{
 			}
 			String newUrl = comm.getActual_url_server();
 
-			if (url_server != newUrl) {
+
+
+			if (!url_server.contentEquals(newUrl)) {
+				System.out.println("Url Changed: "+ url_server +"->" + newUrl);
 				url_server = newUrl;
 				remotePoints = (IPoints) Naming.lookup(url_server);
-
 			}
 		}catch (RemoteException e){
 			e.printStackTrace();
@@ -103,11 +110,6 @@ public class Client extends Thread{
     @Override
     public void run() {
         try {
-            String ip = Util.getIp();
-            System.out.println("my IP: "+ ip);
-            String hostname = ip;
-            System.setProperty("java.rmi.server.hostname", hostname);
-
 
 			//recuperation of the coordinator Object(Comm)
 			comm = (IComm) Naming.lookup(url_coordinator);
