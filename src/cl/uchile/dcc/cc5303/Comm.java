@@ -109,7 +109,6 @@ public class Comm extends UnicastRemoteObject implements IComm{
     }
 
     public boolean getMigrating()throws RemoteException{
-        this.setServer_ready(false);
         notifyOperation("getMigrating:"+migrating);
         return migrating;
     }
@@ -117,6 +116,7 @@ public class Comm extends UnicastRemoteObject implements IComm{
     public void migrate()throws RemoteException{
         removeServer(actual_url_server);
         String new_server = findNewServer();
+        server_ready = false;
         actual_url_server = new_server;
         notifyOperation("migrate");
     }

@@ -77,7 +77,9 @@ public class Server extends Thread{
                 // First step : First reason to migrate
                 if (charge_CPU > 0.75) {
                     // then migrate to another server
+
                     c.setMigrating(true);
+                    c.migrate();
                     System.exit(0);
                 }
             }
