@@ -10,6 +10,7 @@ import java.util.Stack;
  */
 public interface IComm extends Remote {
 
+    public Object mutex = new Object();
 
     public String getUrl_coordinator()throws RemoteException;
 

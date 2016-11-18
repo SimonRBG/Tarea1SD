@@ -85,25 +85,24 @@ public class Server extends Thread{
                  //   System.out.println("CPU charge : " + charge_CPU);
                 //}
                 // First step : First reason to migrate
-                if (charge_CPU > 0.75) {
+                if (charge_CPU > 0.999) {
                     // then migrate to another server
-
-                    c.setMigrating(true);
-
-                    try{
-                        Points mypoints = points.getPoints();
-                        String url = c.getActual_url_server();
-                        System.out.println(url);
-                        IPoints p = (IPoints) Naming.lookup(url);
-                        p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids);
-                    } catch (NotBoundException e) {
-                        e.printStackTrace();
-                    } catch (RemoteException e){
-                        e.printStackTrace();
+                    synchronized (c.mutex) {
+                        c.setMigrating(true);
+                        try {
+                            Points mypoints = points.getPoints();
+                            String url = c.getActual_url_server();
+                            System.out.println(url);
+                            IPoints p = (IPoints) Naming.lookup(url);
+                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers);
+                        } catch (NotBoundException e) {
+                            e.printStackTrace();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
                         }
-                    c.setMigrating(false);
-
-                    System.exit(0);
+                        c.setMigrating(false);
+                    }
+                    //System.exit(0);
                 }
             }
           }catch (RemoteException e){
@@ -151,15 +150,17 @@ public class Server extends Thread{
             registerWithCoordinator(c, s.url_server);
 
             while(true){
+                synchronized (c.mutex) {
+                    if (c.getActual_url_server().compareTo(s.url_server) == 0 && !c.getMigrating()) {
+                        System.out.println("1");
+                        if (!c.getServer_ready()) {
+                            System.out.println("2");
+                            if (!s.isAlive()) {
+                                System.out.println("3");
+                                s.start();
+                                break;
 
-                if(c.getActual_url_server().compareTo(s.url_server)==0 && !c.getMigrating()){
-                    System.out.println("1");
-                    if(!c.getServer_ready()){
-                        System.out.println("2");
-                        if(!s.isAlive()) {
-                            System.out.println("3");
-                            s.start();
-                            break;
+                            }
                         }
                     }
                 }
