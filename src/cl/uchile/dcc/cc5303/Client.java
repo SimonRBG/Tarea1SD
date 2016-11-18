@@ -96,6 +96,9 @@ public class Client extends Thread{
 			e.printStackTrace();
 		}catch(MalformedURLException e){
 			e.printStackTrace();
+		}  catch (ClassCastException e) {
+			System.err.println("No server found");
+			System.exit(1);
 		}
 
 	}

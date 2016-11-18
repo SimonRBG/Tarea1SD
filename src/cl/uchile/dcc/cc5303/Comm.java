@@ -121,6 +121,10 @@ public class Comm extends UnicastRemoteObject implements IComm{
         notifyOperation("migrate");
     }
 
+    public boolean lastServer() throws RemoteException {
+        return urlServers.size() == 1;
+    }
+
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);
     }

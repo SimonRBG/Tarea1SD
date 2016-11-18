@@ -85,7 +85,7 @@ public class Server extends Thread{
                  //   System.out.println("CPU charge : " + charge_CPU);
                 //}
                 // First step : First reason to migrate
-                if (charge_CPU > 0.999) {
+                if (charge_CPU > 0.999 && ! c.lastServer()) {
                     // then migrate to another server
                     synchronized (c.mutex) {
                         c.setMigrating(true);
@@ -99,22 +99,25 @@ public class Server extends Thread{
                             e.printStackTrace();
                         } catch (RemoteException e) {
                             e.printStackTrace();
+                        }  catch (ClassCastException e) {
+                            System.err.println("No server found");
+                            System.exit(1);
                         }
                         c.setMigrating(false);
                     }
-                    //System.exit(0);
+                    System.exit(0);
                 }
             }
           }catch (RemoteException e){
             e.printStackTrace();
-        }catch (MalformedURLException e){
+        }catch (MalformedURLException e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args){
         int n = 2;
-        String p = "60001";
+        String p = "60002";
         String pc = "60000";
         String ipc = Util.getIp();
         for (int i = 0; i < args.length; i++) {

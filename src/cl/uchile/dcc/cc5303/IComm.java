@@ -36,5 +36,6 @@ public interface IComm extends Remote {
 
     public void setActual_url_server(String actual_url_server) throws RemoteException;
 
+    public boolean lastServer() throws RemoteException;
 
 }
