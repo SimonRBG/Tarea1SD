@@ -22,8 +22,9 @@ public class Board extends Canvas{
     public Image score_board;
     public Graphics buffer;
     public Graphics buffer_score;
+    public int dHip;
 
-    public Board(int width, int height) {
+    public Board(int width, int height, int dHip) {
         this.width = width;
         this.height = height;
         this.wait = true;
@@ -35,6 +36,7 @@ public class Board extends Canvas{
         colors[2] = Color.yellow;
         colors[3] = Color.green;
         colors[4] = Color.cyan;
+        this.dHip = dHip;
 
     }
 
@@ -90,7 +92,7 @@ public class Board extends Canvas{
                 IPoint p = (IPoint) itr.next();
                 try{
                     if (p.getVisible())
-                        buffer.fillOval(p.getX() - Point.dHip / 2, p.getY() - Point.dHip / 2, Point.dHip, Point.dHip);
+                        buffer.fillOval(p.getX() - dHip / 2, p.getY() - dHip / 2, dHip, dHip);
                 }catch (RemoteException e){
                     e.printStackTrace();
                 }
