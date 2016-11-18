@@ -85,7 +85,7 @@ public class Server extends Thread{
                  //   System.out.println("CPU charge : " + charge_CPU);
                 //}
                 // First step : First reason to migrate
-                if (charge_CPU > 0.999 && ! c.lastServer()) {
+                if (charge_CPU > 0.75 && ! c.lastServer()) {
                     // then migrate to another server
                     synchronized (c.mutex) {
                         c.setMigrating(true);
