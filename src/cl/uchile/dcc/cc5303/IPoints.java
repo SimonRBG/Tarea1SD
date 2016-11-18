@@ -10,8 +10,6 @@ import java.util.Stack;
 
 public interface IPoints extends Remote{
 
-    public Object mutex = new Object();
-
     public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<IPoint>[] l, Stack ids, int numplayers)throws RemoteException;
 
     public Points getPoints() throws RemoteException;
