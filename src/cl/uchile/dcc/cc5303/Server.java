@@ -75,19 +75,14 @@ public class Server extends Thread{
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                // TODO : Test on Linux if the same Method works
-                // if (bean.getName().contains("Windows")) {
-                    charge_CPU = bean.getSystemCpuLoad();
-                    System.out.println("CPU charge : " + charge_CPU);
-                // }
-                //else {
-                //    charge_CPU = bean.getSystemLoadAverage();
-                 //   System.out.println("CPU charge : " + charge_CPU);
-                //}
+                charge_CPU = bean.getSystemCpuLoad();
+                System.out.println("CPU charge : " + charge_CPU);
+
                 // First step : First reason to migrate
                 if (charge_CPU > 0.75 && ! c.lastServer()) {
                     // then migrate to another server
                     synchronized (c.mutex) {
+                        c.setChargeActualServer(charge_CPU);
                         c.setMigrating(true);
                         try {
                             Points mypoints = points.getPoints();
@@ -117,7 +112,8 @@ public class Server extends Thread{
 
     public static void main(String[] args){
         int n = 2;
-        String p = "60002";
+        double charge_CPU;
+        String p = "60003";
         String pc = "60000";
         String ipc = Util.getIp();
         for (int i = 0; i < args.length; i++) {
@@ -150,10 +146,22 @@ public class Server extends Thread{
         try{
             c = (IComm) Naming.lookup(url_coordinator);
             System.out.println(s.url_server);
-            registerWithCoordinator(c, s.url_server);
+            int index = registerWithCoordinator(c, s.url_server);
+            com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            if (bean == null)
+                throw new NullPointerException("Unable to collect operating system metrics, jmx bean is null");
 
             while(true){
                 synchronized (c.mutex) {
+                    try {
+                        // We sleep to not surcharge the server's CPU charge
+                        sleep(1000);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                        charge_CPU = bean.getSystemCpuLoad();
+                        System.out.println("CPU charge (waiting to be elected) : " + charge_CPU);
+                        c.addChargeServer(index, charge_CPU);
                     if (c.getActual_url_server().compareTo(s.url_server) == 0 && !c.getMigrating()) {
                         System.out.println("1");
                         if (!c.getServer_ready()) {
@@ -189,8 +197,8 @@ public class Server extends Thread{
 
     }
 
-    public static void registerWithCoordinator(IComm c, String s) throws RemoteException{
-        c.addServer(s);
+    public static int registerWithCoordinator(IComm c, String s) throws RemoteException{
+        return c.addServer(s);
     }
 
 

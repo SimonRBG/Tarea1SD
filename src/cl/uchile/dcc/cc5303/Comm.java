@@ -13,6 +13,8 @@ public class Comm extends UnicastRemoteObject implements IComm{
 
     List<Server> servers;
     List<String> urlServers;
+    double chargeActualServer;
+    List<Double> chargeNewServer;
     String ip;
     String port;
     String url_coordinator;
@@ -23,6 +25,7 @@ public class Comm extends UnicastRemoteObject implements IComm{
 
     public Comm(String ip, String port) throws RemoteException{
         urlServers = new ArrayList<String>();
+        chargeNewServer = new ArrayList<Double>();
         System.out.println(urlServers);
         server_ready = false;
         servers  = new ArrayList<Server>();
@@ -54,6 +57,14 @@ public class Comm extends UnicastRemoteObject implements IComm{
         this.url_coordinator = url_coordinator;
     }
 
+    public void setChargeActualServer(double charge) throws RemoteException{
+        this.chargeActualServer = charge;
+    }
+
+    public double getChargeActualServer() throws RemoteException{
+        return chargeActualServer;
+    }
+
     public String getActual_url_server() throws RemoteException{
         //notifyOperation("getActual_url_server:"+ actual_url_server);
         return actual_url_server;
@@ -64,7 +75,11 @@ public class Comm extends UnicastRemoteObject implements IComm{
         this.actual_url_server = actual_url_server;
     }
 
-    public void addServer(String url_server)throws RemoteException{
+    public void addChargeServer (int index, double charge ) throws RemoteException{
+        chargeNewServer.add(index, charge);
+    }
+
+    public int addServer(String url_server)throws RemoteException{
         urlServers.add(url_server);
         notifyOperation("addServer:"+url_server);
         if(urlServers.size()==1){
@@ -73,6 +88,7 @@ public class Comm extends UnicastRemoteObject implements IComm{
             notifyOperation("SetActualServer:"+url_server);
             //startServer(s);
         }
+        return urlServers.size()-1;
     }
 
     public boolean removeServer(String url_server)throws RemoteException{
@@ -92,8 +108,19 @@ public class Comm extends UnicastRemoteObject implements IComm{
 
     public String findNewServer()throws RemoteException{
         if(!urlServers.isEmpty()) {
-            notifyOperation("findNewServer"+urlServers.get(0));
-            return urlServers.get(0);
+            boolean serverFound = false;
+            int i = 0;
+            while (i  < urlServers.size() && !serverFound) {
+                if (!urlServers.get(i).contains(actual_url_server))
+                    serverFound = chargeActualServer > chargeNewServer.get(i);
+                i++;
+            }
+            if (!serverFound)
+                i--;
+            else
+                i = 0;
+            notifyOperation("findNewServer"+urlServers.get(i));
+            return urlServers.get(i);
         }else {
             notifyOperation("findNewServer: no server found");
             return "";
