@@ -22,6 +22,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     public boolean allLost;
     public boolean ready[];
     public int w, h;
+    boolean someOneQuit;
 
     public Object mutex2 = new Object();
 
@@ -29,6 +30,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         synchronized (mutex2) {
             this.w = w;
             this.h = h;
+            this.someOneQuit = false;
             this.scores = new int[n];
             this.looses = new boolean[n];
             this.ready = new boolean[n];
@@ -38,7 +40,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             for (int i = 0; i < n; i++) {
                 this.looses[i] = false;
                 this.ready[i] = false;
-                this.scores[i] = 0;
+                this.scores[i] = -1;
                 list[i] = new LinkedHashSet<IPoint>();
                 ids.push(n - 1 - i);
             }
@@ -104,17 +106,14 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     private boolean checkAllPlayers(){
-        synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
                 if (!this.looses[i])
                     return false;
             }
             return true;
-        }
     }
 
     private boolean check(IPoint p) throws RemoteException {
-        synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
                 // TODO : Change the evaluation criteria
                 Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
@@ -136,7 +135,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                 }
             }
             return true;
-        }
     }
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException {
@@ -145,14 +143,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
     }
 
-    public void notify_score(int id) throws RemoteException {
+    private void notify_score(int id) {
         // Update the score of all the others snakes alive
-        synchronized (mutex2) {
             for (int i = 0; i < numplayers; i++) {
                 if (i != id && !this.looses[i])
                     scores[i]++;
             }
-        }
     }
 
     public int getScore(int id) throws RemoteException {
@@ -180,6 +176,9 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
             int id = (int) ids.peek();
             notifyOperation("new id " + id);
+            scores[id] = 0;
+            this.ready[id] = true;
+            this.looses[id] = false;
             return (int) ids.pop();
         }
     }
@@ -204,6 +203,35 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
     }
 
+    public void setQuit(int id) throws  RemoteException{
+        synchronized (mutex2) {
+            list[id].clear();
+            this.looses[id] = true;
+
+            notify_score(id);
+            if (checkAllPlayers()) {
+                this.allLost = true;
+                notifyOperation("all Lost");
+            }
+            // Id available & reinitilize the score
+            ids.push(new Integer(id));
+            this.scores[id] = -1;
+            this.ready[id] = true;
+            this.someOneQuit = true;
+            notifyOperation("player " + id + " quit!!");
+        }
+    }
+
+    public boolean someOneQuit() throws  RemoteException{
+        synchronized (mutex2) {
+            if (someOneQuit) {
+                someOneQuit = false;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);
     }

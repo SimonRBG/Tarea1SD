@@ -16,7 +16,9 @@ public interface IComm extends Remote {
 
     public void setUrl_coordinator(String url_coordinator)throws RemoteException;
 
-    public void addServer(String s)throws RemoteException;
+    public void addChargeServer (int index, double charge ) throws RemoteException;
+
+    public int addServer(String s)throws RemoteException;
 
     public boolean removeServer(String url_server)throws RemoteException;
 
@@ -31,6 +33,10 @@ public interface IComm extends Remote {
     public Boolean getServer_ready() throws RemoteException;
 
     public void setServer_ready(Boolean b) throws RemoteException;
+
+    public void setChargeActualServer(double charge) throws RemoteException;
+
+    public double getChargeActualServer() throws RemoteException;
 
     public String getActual_url_server() throws RemoteException;
 

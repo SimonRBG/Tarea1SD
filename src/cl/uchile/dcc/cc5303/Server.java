@@ -33,6 +33,7 @@ public class Server extends Thread{
 
     static IComm c;
     double charge_CPU;
+    int index;
 
     public Server(int n, String pc, String ipc, String p){
         ip = Util.getIp();
@@ -75,19 +76,19 @@ public class Server extends Thread{
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                // TODO : Test on Linux if the same Method works
-                // if (bean.getName().contains("Windows")) {
-                    charge_CPU = bean.getSystemCpuLoad();
-                    System.out.println("CPU charge : " + charge_CPU);
-                // }
-                //else {
-                //    charge_CPU = bean.getSystemLoadAverage();
-                 //   System.out.println("CPU charge : " + charge_CPU);
-                //}
-                // First step : First reason to migrate
-                if (charge_CPU > 0.75 && ! c.lastServer()) {
+                charge_CPU = bean.getSystemCpuLoad();
+                System.out.println("CPU charge : " + charge_CPU);
+
+                // First step : First reason to migrate : CPU_charge. Second reason : someOneQuit
+                if ((charge_CPU > 0.75 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
                     // then migrate to another server
+                    if (charge_CPU > 0.75) {
+                        System.out.println("migrate because of the CPU charge");
+                    } else {
+                        System.out.println("migrate because someone has quitted the game");
+                    }
                     synchronized (c.mutex) {
+                        c.setChargeActualServer(charge_CPU);
                         c.setMigrating(true);
                         try {
                             Points mypoints = points.getPoints();
@@ -95,6 +96,9 @@ public class Server extends Thread{
                             System.out.println(url);
                             IPoints p = (IPoints) Naming.lookup(url);
                             p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers);
+                            Naming.unbind(url_server);
+                            points = new Points(num_players, w, h);
+                            Naming.rebind(url_server, points);
                         } catch (NotBoundException e) {
                             e.printStackTrace();
                         } catch (RemoteException e) {
@@ -105,7 +109,7 @@ public class Server extends Thread{
                         }
                         c.setMigrating(false);
                     }
-                    System.exit(0);
+                    this.waitToBeElected(false);
                 }
             }
           }catch (RemoteException e){
@@ -117,7 +121,8 @@ public class Server extends Thread{
 
     public static void main(String[] args){
         int n = 2;
-        String p = "60002";
+        double charge_CPU;
+        String p = "60003";
         String pc = "60000";
         String ipc = Util.getIp();
         for (int i = 0; i < args.length; i++) {
@@ -150,32 +155,9 @@ public class Server extends Thread{
         try{
             c = (IComm) Naming.lookup(url_coordinator);
             System.out.println(s.url_server);
-            registerWithCoordinator(c, s.url_server);
+            s.index = registerWithCoordinator(c, s.url_server);
+            s.waitToBeElected(true);
 
-            while(true){
-                synchronized (c.mutex) {
-                    if (c.getActual_url_server().compareTo(s.url_server) == 0 && !c.getMigrating()) {
-                        System.out.println("1");
-                        if (!c.getServer_ready()) {
-                            System.out.println("2");
-                            if (!s.isAlive()) {
-                                System.out.println("3");
-                                s.start();
-                                break;
-
-                            }
-                        }
-                    }
-                }
-                //TODO revisar el canal de comunicación periódicamente??
-                //TODO revisar si hay que migrar y dar la orden al Server y avisar al coordinador
-            }
-
-            //while(true){
-            //    if(c.getMigrating()){
-
-            //    }
-            //}
         } catch (NotBoundException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -189,57 +171,46 @@ public class Server extends Thread{
 
     }
 
-    public static void registerWithCoordinator(IComm c, String s) throws RemoteException{
-        c.addServer(s);
-    }
+    public void waitToBeElected(boolean firstTime) {
+        com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        if (bean == null)
+            throw new NullPointerException("Unable to collect operating system metrics, jmx bean is null");
 
+        while (true) {
+            try {
+                synchronized (c.mutex) {
+                    try {
+                        // We sleep to not surcharge the server's CPU charge
+                        sleep(1000);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    this.charge_CPU = bean.getSystemCpuLoad();
+                    System.out.println("CPU charge (waiting to be elected) : " + this.charge_CPU);
+                    c.addChargeServer(this.index, this.charge_CPU);
+                    if (c.getActual_url_server().compareTo(this.url_server) == 0 && !this.c.getMigrating()) {
+                        System.out.println("1");
+                        if (!c.getServer_ready()) {
 
+                            System.out.println("2");
+                            if (firstTime)
+                                this.start();
+                            else
+                                c.setServer_ready(true);
+                            break;
 
-/*
-    public static void main(String[] args) {
+                            }
+                        }
+                    }
 
-
-
-        try{
-
-            String ip = Util.getIp();
-            String port = "1099";
-            System.out.println("serversIP: "+ip);
-            url_server=url_server.replace("ip",ip);
-            url_server=url_server.replace("port",port);
-            System.out.println(url_server);
-
-            // Line to solve rmiregistry Bug
-            String hostname = ip;
-            System.setProperty("java.rmi.server.hostname", hostname);
-
-            // Parsing of the argument to launch with -n option
-            int n = 2;
-            for (int i = 0; i < args.length; i++) {
-                if (args[i].equals("-n")  && args[i+1]!=null){
-                    n = Integer.parseInt(args[i+1]);
-                    // Assume that we can't have negatives and >5 values
- 		            if (n > 5){
-			            n = 5;
-		            }
-		            if (n < 1){
-			            n = 1;
-		            }
-		            break;
-                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
 
-            int portint = Integer.parseInt(port);
-            LocateRegistry.createRegistry(portint);
-            points = new Points(n, w, h);
-            Naming.rebind(url_server, points);
-            System.out.println("Objeto points publicado en: " + url_server);
-
-        }catch (RemoteException e){
-            e.printStackTrace();
-        }catch (MalformedURLException e){
-            e.printStackTrace();
         }
     }
-    */
+
+    public static int registerWithCoordinator(IComm c, String s) throws RemoteException{
+        return c.addServer(s);
+    }
 }

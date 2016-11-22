@@ -22,7 +22,7 @@ public class Client extends Thread{
 	public static IComm comm;
 
     private int w, h;
-    private final static int UPDATE_RATE = 30;
+    private final static int UPDATE_RATE = 5;
     private final static int GROW_RATE = 3;
 	private final static int margin_Border = 50;
 
@@ -88,7 +88,6 @@ public class Client extends Thread{
 				System.out.println("Url Changed: "+ url_server +"->" + newUrl);
 				url_server = newUrl;
 				remotePoints = (IPoints) Naming.lookup(url_server);
-
 			}
 		}catch (RemoteException e){
 			e.printStackTrace();
@@ -111,6 +110,7 @@ public class Client extends Thread{
 			comm = (IComm) Naming.lookup(url_coordinator);
 			while(!comm.getServer_ready()){
 				//wait
+				System.out.println("waiting Server");
 				try {
 					this.sleep(1000 / UPDATE_RATE);
 				} catch (InterruptedException ex) {
@@ -140,6 +140,7 @@ public class Client extends Thread{
 				synchronized (comm.mutex) {
                     checkMigration();
 					id = remotePoints.getId();
+
 				}
             }catch(EmptyStackException e){
 				System.out.println("Límite de jugadores Alcanzado!!");
@@ -191,6 +192,21 @@ public class Client extends Thread{
 						if (keys[KeyEvent.VK_DOWN]) {
 							//System.out.println("DOWN");
 							player.moveDown();
+						}
+						if (keys[KeyEvent.VK_Q]) {
+							// We quit the game
+							System.out.println("bye-bye");
+							synchronized (comm.mutex){
+								checkMigration();
+								remotePoints.setQuit(player.id);
+							}
+							synchronized (comm.mutex) {
+								checkMigration();
+								player.ended = remotePoints.lost(id);
+							}
+							keepPlaying = false;
+
+							System.exit(0);
 						}
 						++frames;
 
@@ -272,7 +288,7 @@ public class Client extends Thread{
                     checkMigration();
 					remotePoints.setReady(id, false, true);
 				}
-                System.out.println("waiting for key: Y to continue, N to finish");
+                System.out.println("waiting for key: Y to continue, Q to Quit");
 				tablero.points = null;
 				tablero.press=true;
 				tablero.repaint();//paint the points in the board
@@ -289,9 +305,15 @@ public class Client extends Thread{
 						}
 						break;
 					}
-					if (keys[KeyEvent.VK_N]) {
+					if (keys[KeyEvent.VK_Q]) {
 						System.out.println("bye-bye");
 						keepPlaying = false;
+
+						synchronized (comm.mutex){
+							checkMigration();
+							remotePoints.setQuit(player.id);
+						}
+
 						//waitMigrating();
 
 						synchronized (comm.mutex) {
