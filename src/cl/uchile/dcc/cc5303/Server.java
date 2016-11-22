@@ -80,9 +80,9 @@ public class Server extends Thread{
                 System.out.println("CPU charge : " + charge_CPU);
 
                 // First step : First reason to migrate : CPU_charge. Second reason : someOneQuit
-                if ((charge_CPU > 0.95 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
+                if ((charge_CPU > 0.75 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
                     // then migrate to another server
-                    if (charge_CPU > 0.95) {
+                    if (charge_CPU > 0.75) {
                         System.out.println("migrate because of the CPU charge");
                     } else {
                         System.out.println("migrate because someone has quitted the game");
