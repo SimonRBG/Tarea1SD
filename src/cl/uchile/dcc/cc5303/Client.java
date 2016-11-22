@@ -192,6 +192,18 @@ public class Client extends Thread{
 							//System.out.println("DOWN");
 							player.moveDown();
 						}
+						if (keys[KeyEvent.VK_Q]) {
+							// We quit the game
+							System.out.println("bye-bye");
+							synchronized (comm.mutex){
+								remotePoints.setQuit(player.id);
+							}
+							player.ended = remotePoints.lost(id);
+							keepPlaying = false;
+							// TODO : Liberate garbage collector
+							// TODO : Is it feasible to detect when we click on the red cross
+							System.exit(0);
+						}
 						++frames;
 
 						if (frames == GROW_RATE){

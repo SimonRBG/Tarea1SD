@@ -35,5 +35,9 @@ public interface IPoints extends Remote{
     public boolean lost(int id) throws RemoteException;
 	
     public void setReady(int id, boolean r, boolean l) throws RemoteException;
+
+    public void setQuit(int id) throws  RemoteException;
+
+    public boolean someOneQuit() throws  RemoteException;
 }
 

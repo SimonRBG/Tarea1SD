@@ -78,9 +78,14 @@ public class Server extends Thread{
                 charge_CPU = bean.getSystemCpuLoad();
                 System.out.println("CPU charge : " + charge_CPU);
 
-                // First step : First reason to migrate
-                if (charge_CPU > 0.75 && ! c.lastServer()) {
+                // First step : First reason to migrate : CPU_charge. Second reason : someOneQuit
+                if ((charge_CPU > 0.75 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
                     // then migrate to another server
+                    if (charge_CPU > 0.75) {
+                        System.out.println("migrate because of the CPU charge");
+                    } else {
+                        System.out.println("migrate because someone has quitted the game");
+                    }
                     synchronized (c.mutex) {
                         c.setChargeActualServer(charge_CPU);
                         c.setMigrating(true);
