@@ -22,7 +22,7 @@ public class Client extends Thread{
 	public static IComm comm;
 
     private int w, h;
-    private final static int UPDATE_RATE = 30;
+    private final static int UPDATE_RATE = 5;
     private final static int GROW_RATE = 3;
 	private final static int margin_Border = 50;
 
@@ -284,7 +284,7 @@ public class Client extends Thread{
                     checkMigration();
 					remotePoints.setReady(id, false, true);
 				}
-                System.out.println("waiting for key: Y to continue, N to finish");
+                System.out.println("waiting for key: Y to continue, Q to Quit");
 				tablero.points = null;
 				tablero.press=true;
 				tablero.repaint();//paint the points in the board
@@ -301,9 +301,14 @@ public class Client extends Thread{
 						}
 						break;
 					}
-					if (keys[KeyEvent.VK_N]) {
+					if (keys[KeyEvent.VK_Q]) {
 						System.out.println("bye-bye");
 						keepPlaying = false;
+
+						synchronized (comm.mutex){
+							remotePoints.setQuit(player.id);
+						}
+
 						//waitMigrating();
 
 						synchronized (comm.mutex) {

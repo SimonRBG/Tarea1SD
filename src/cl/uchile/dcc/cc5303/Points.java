@@ -40,7 +40,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             for (int i = 0; i < n; i++) {
                 this.looses[i] = false;
                 this.ready[i] = false;
-                this.scores[i] = 0;
+                this.scores[i] = -1;
                 list[i] = new LinkedHashSet<IPoint>();
                 ids.push(n - 1 - i);
             }
@@ -182,7 +182,11 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
             int id = (int) ids.peek();
             notifyOperation("new id " + id);
+            scores[id] = 0;
+            this.ready[id] = false;
+            this.looses[id] = false;
             return (int) ids.pop();
+
         }
     }
 
@@ -207,27 +211,32 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     public void setQuit(int id) throws  RemoteException{
-        list[id].clear();
-        this.looses[id] = true;
+        synchronized (mutex2) {
+            list[id].clear();
+            this.looses[id] = true;
 
-        notify_score(id);
-        if (checkAllPlayers()) {
-            this.allLost = true;
-            notifyOperation("all Lost");
+            notify_score(id);
+            if (checkAllPlayers()) {
+                this.allLost = true;
+                notifyOperation("all Lost");
+            }
+            // Id available & reinitilize the score
+            ids.push(new Integer(id));
+            this.scores[id] = -1;
+            this.ready[id] = true;
+            this.someOneQuit = true;
+            notifyOperation("player " + id + " quit!!");
         }
-        // Id available & reinitilize the score
-        ids.push(new Integer(id));
-        this.scores[id] = 0;
-        this.someOneQuit = true;
-        notifyOperation("player " + id + " quit!!");
     }
 
     public boolean someOneQuit() throws  RemoteException{
-        if (someOneQuit) {
-            someOneQuit= false;
-            return true;
-        } else {
-            return false;
+        synchronized (mutex2) {
+            if (someOneQuit) {
+                someOneQuit = false;
+                return true;
+            } else {
+                return false;
+            }
         }
     }
     private void notifyOperation(String s){

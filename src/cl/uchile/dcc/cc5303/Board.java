@@ -62,7 +62,7 @@ public class Board extends Canvas{
         // dibujar elementos del juego
         draw(points, scores, numplayers);
         if(this.press){
-            drawString("Press Y to continue, N to finish");
+            drawString("Press Y to continue, Q to Quit");
         }
         if(this.wait){
             drawString("Waiting for other players...");
@@ -109,7 +109,7 @@ public class Board extends Canvas{
         int ind_p[] = new int[numplayers];
         int max_p[] = new int[numplayers];
         for (int j = 0; j < numplayers; j++) {
-            max_p[j] = 0;
+            max_p[j] = -2;
         }
         for (int j = 0; j < numplayers; j++) {
             for (int i = 0; i < numplayers ; i++) {
@@ -124,11 +124,17 @@ public class Board extends Canvas{
                 }
             }
         }
+        int aux = 0;
         for (int i = 0; i < numplayers; i++) {
+            if(max_p[i] == -1) {
+                System.out.println("dont print score");
+                continue;
+            }
             buffer_score.setColor(colors[ind_p[i]]);
             Font f = new Font(null, Font.BOLD,12);
             buffer_score.setFont(f);
-            buffer_score.drawString("Player " + ind_p[i] + ": " + max_p[i] + " pts" ,  1, 15*i+20 );
+            buffer_score.drawString("Player " + ind_p[i] + ": " + max_p[i] + " pts" ,  1, 15*aux+20 );
+            aux = aux+1;
         }
     }
 
