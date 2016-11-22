@@ -186,7 +186,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             this.ready[id] = false;
             this.looses[id] = false;
             return (int) ids.pop();
-
         }
     }
 
