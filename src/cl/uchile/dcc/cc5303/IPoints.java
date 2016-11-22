@@ -27,8 +27,6 @@ public interface IPoints extends Remote{
     public int getNumPlayers() throws RemoteException;
 
     public boolean allPlayersReady() throws RemoteException;
-
-    public void notify_score(int id) throws RemoteException;
 	
     public boolean allLost() throws RemoteException;
 

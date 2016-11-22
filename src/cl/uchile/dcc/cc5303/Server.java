@@ -96,7 +96,9 @@ public class Server extends Thread{
                             System.out.println(url);
                             IPoints p = (IPoints) Naming.lookup(url);
                             p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers);
+                            Naming.unbind(url_server);
                             points = new Points(num_players, w, h);
+                            Naming.rebind(url_server, points);
                         } catch (NotBoundException e) {
                             e.printStackTrace();
                         } catch (RemoteException e) {
@@ -189,10 +191,13 @@ public class Server extends Thread{
                     if (c.getActual_url_server().compareTo(this.url_server) == 0 && !this.c.getMigrating()) {
                         System.out.println("1");
                         if (!c.getServer_ready()) {
+
                             System.out.println("2");
-                                if (firstTime)
-                                    this.start();
-                                break;
+                            if (firstTime)
+                                this.start();
+                            else
+                                c.setServer_ready(true);
+                            break;
 
                             }
                         }

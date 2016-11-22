@@ -106,17 +106,14 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     }
 
     private boolean checkAllPlayers(){
-        synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
                 if (!this.looses[i])
                     return false;
             }
             return true;
-        }
     }
 
     private boolean check(IPoint p) throws RemoteException {
-        synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
                 // TODO : Change the evaluation criteria
                 Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
@@ -138,7 +135,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                 }
             }
             return true;
-        }
     }
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException {
@@ -147,14 +143,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
     }
 
-    public void notify_score(int id) throws RemoteException {
+    private void notify_score(int id) {
         // Update the score of all the others snakes alive
-        synchronized (mutex2) {
             for (int i = 0; i < numplayers; i++) {
                 if (i != id && !this.looses[i])
                     scores[i]++;
             }
-        }
     }
 
     public int getScore(int id) throws RemoteException {
@@ -183,7 +177,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             int id = (int) ids.peek();
             notifyOperation("new id " + id);
             scores[id] = 0;
-            this.ready[id] = false;
+            this.ready[id] = true;
             this.looses[id] = false;
             return (int) ids.pop();
         }

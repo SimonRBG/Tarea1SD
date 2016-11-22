@@ -110,6 +110,7 @@ public class Client extends Thread{
 			comm = (IComm) Naming.lookup(url_coordinator);
 			while(!comm.getServer_ready()){
 				//wait
+				System.out.println("waiting Server");
 				try {
 					this.sleep(1000 / UPDATE_RATE);
 				} catch (InterruptedException ex) {
@@ -139,6 +140,7 @@ public class Client extends Thread{
 				synchronized (comm.mutex) {
                     checkMigration();
 					id = remotePoints.getId();
+
 				}
             }catch(EmptyStackException e){
 				System.out.println("Límite de jugadores Alcanzado!!");
