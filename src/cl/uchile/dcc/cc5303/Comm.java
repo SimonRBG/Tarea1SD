@@ -141,7 +141,6 @@ public class Comm extends UnicastRemoteObject implements IComm{
     }
 
     public void migrate()throws RemoteException{
-        removeServer(actual_url_server);
         String new_server = findNewServer();
         server_ready = false;
         actual_url_server = new_server;

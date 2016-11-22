@@ -200,8 +200,7 @@ public class Client extends Thread{
 							}
 							player.ended = remotePoints.lost(id);
 							keepPlaying = false;
-							// TODO : Liberate garbage collector
-							// TODO : Is it feasible to detect when we click on the red cross
+
 							System.exit(0);
 						}
 						++frames;

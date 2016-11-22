@@ -209,7 +209,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     public void setQuit(int id) throws  RemoteException{
         list[id].clear();
         this.looses[id] = true;
-
         notify_score(id);
         if (checkAllPlayers()) {
             this.allLost = true;
