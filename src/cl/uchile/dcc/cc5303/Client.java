@@ -88,7 +88,6 @@ public class Client extends Thread{
 				System.out.println("Url Changed: "+ url_server +"->" + newUrl);
 				url_server = newUrl;
 				remotePoints = (IPoints) Naming.lookup(url_server);
-
 			}
 		}catch (RemoteException e){
 			e.printStackTrace();
@@ -196,9 +195,13 @@ public class Client extends Thread{
 							// We quit the game
 							System.out.println("bye-bye");
 							synchronized (comm.mutex){
+								checkMigration();
 								remotePoints.setQuit(player.id);
 							}
-							player.ended = remotePoints.lost(id);
+							synchronized (comm.mutex) {
+								checkMigration();
+								player.ended = remotePoints.lost(id);
+							}
 							keepPlaying = false;
 
 							System.exit(0);
@@ -305,6 +308,7 @@ public class Client extends Thread{
 						keepPlaying = false;
 
 						synchronized (comm.mutex){
+							checkMigration();
 							remotePoints.setQuit(player.id);
 						}
 
