@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -80,6 +81,29 @@ public class Client extends Thread{
 		System.setProperty("java.rmi.server.hostname", hostname);
     }
 
+	public void sleep(){
+		try {
+			this.sleep(1000 / UPDATE_RATE);
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public void waitRecuperation(){
+		String points = "";
+		tablero.drawStringWait(points);
+		boolean serverRecup = false;
+		while (!serverRecup) {
+			// TODO : Verify with the function if the server is recuperating
+			this.sleep();
+			points+=".";
+			if (points.length() > 3)
+				points="";
+			tablero.drawStringWait(points);
+		}
+		System.out.println();
+		// TODO : do the treatment to recupare all points
+	}
 
     public void checkMigration(){
 		try {
@@ -87,7 +111,11 @@ public class Client extends Thread{
 			if (!url_server.contentEquals(newUrl)) {
 				System.out.println("Url Changed: "+ url_server +"->" + newUrl);
 				url_server = newUrl;
-				remotePoints = (IPoints) Naming.lookup(url_server);
+				try {
+					remotePoints = (IPoints) Naming.lookup(url_server);
+				} catch (ConnectException e){
+					this.waitRecuperation();
+				}
 			}
 		}catch (RemoteException e){
 			e.printStackTrace();
@@ -124,14 +152,22 @@ public class Client extends Thread{
 			synchronized (comm.mutex) {
                 checkMigration();
 				// Recuperation of the shared object
-				remotePoints = (IPoints) Naming.lookup(url_server);
+				try {
+					remotePoints = (IPoints) Naming.lookup(url_server);
+				} catch (ConnectException e){
+					this.waitRecuperation();
+				}
 			}
 
 			//waitMigrating();
 
 			synchronized (comm.mutex) {
                 checkMigration();
-				this.tablero.numplayers = remotePoints.getNumPlayers();
+				try {
+					this.tablero.numplayers = remotePoints.getNumPlayers();
+				} catch (ConnectException e){
+					this.waitRecuperation();
+				}
 			}
             System.out.println(url_server);
             try{
@@ -139,7 +175,11 @@ public class Client extends Thread{
 
 				synchronized (comm.mutex) {
                     checkMigration();
-					id = remotePoints.getId();
+					try {
+						id = remotePoints.getId();
+					} catch (ConnectException e){
+						this.waitRecuperation();
+					}
 
 				}
             }catch(EmptyStackException e){
@@ -165,7 +205,11 @@ public class Client extends Thread{
 
 				synchronized (comm.mutex) {
                     checkMigration();
-					remotePoints.setReady(id, true, false);
+					try {
+						remotePoints.setReady(id, true, false);
+					} catch (ConnectException e){
+						this.waitRecuperation();;
+					}
 				}
 				//wait for others
 				//waitMigrating();
@@ -175,7 +219,11 @@ public class Client extends Thread{
 
 					synchronized (comm.mutex) {
                         checkMigration();
-						allready = remotePoints.allPlayersReady();
+						try {
+							allready = remotePoints.allPlayersReady();
+						} catch (ConnectException e){
+							this.waitRecuperation();;
+						}
 					}
 					continue;
 			    }
@@ -198,11 +246,19 @@ public class Client extends Thread{
 							System.out.println("bye-bye");
 							synchronized (comm.mutex){
 								checkMigration();
-								remotePoints.setQuit(player.id);
+								try {
+									remotePoints.setQuit(player.id);
+								} catch (ConnectException e){
+									this.waitRecuperation();
+								}
 							}
 							synchronized (comm.mutex) {
 								checkMigration();
-								player.ended = remotePoints.lost(id);
+								try {
+									player.ended = remotePoints.lost(id);
+								} catch (ConnectException e){
+									this.waitRecuperation();
+								}
 							}
 							keepPlaying = false;
 
@@ -227,7 +283,11 @@ public class Client extends Thread{
 
 							synchronized (comm.mutex) {
                                 checkMigration();
-								remotePoints.addPoint(new_point, id);
+								try {
+									remotePoints.addPoint(new_point, id);
+								} catch (ConnectException e){
+									this.waitRecuperation();
+								}
 							}
 							frames = 0;
 						}
@@ -239,7 +299,11 @@ public class Client extends Thread{
 
 					synchronized (comm.mutex) {
                         checkMigration();
-						tablero.scores = remotePoints.getScores();
+						try {
+							tablero.scores = remotePoints.getScores();
+						}catch (ConnectException e){
+							this.waitRecuperation();
+						}
 					}
 					player.score = tablero.scores[player.id];
 					// Pass the points to the board
@@ -247,13 +311,21 @@ public class Client extends Thread{
 
 					synchronized (comm.mutex) {
                         checkMigration();
-						tablero.points = remotePoints.getList();
+						try {
+							tablero.points = remotePoints.getList();
+						} catch (ConnectException e){
+							this.waitRecuperation();
+						}
 					}
 					//waitMigrating();
 
 					synchronized (comm.mutex) {
                         checkMigration();
-						player.ended = remotePoints.lost(id);
+						try {
+							player.ended = remotePoints.lost(id);
+						} catch (ConnectException e){
+							this.waitRecuperation();
+						}
 					}
                     synchronized (comm.mutex) {
                         tablero.repaint();//paint the points in the board=
@@ -261,11 +333,15 @@ public class Client extends Thread{
 
 					if(player.ended){
 						//waitMigrating();
-						boolean allLost;
+						boolean allLost = false;
 
 						synchronized (comm.mutex) {
                             checkMigration();
-							allLost = remotePoints.allLost();
+							try {
+								allLost = remotePoints.allLost();
+							} catch (ConnectException e){
+								this.waitRecuperation();
+							}
 						}
 						if(allLost){
 							System.out.println("allLost");
@@ -286,7 +362,11 @@ public class Client extends Thread{
 
 				synchronized (comm.mutex) {
                     checkMigration();
-					remotePoints.setReady(id, false, true);
+					try {
+						remotePoints.setReady(id, false, true);
+					} catch (ConnectException e){
+						this.waitRecuperation();
+					}
 				}
                 System.out.println("waiting for key: Y to continue, Q to Quit");
 				tablero.points = null;
@@ -301,7 +381,11 @@ public class Client extends Thread{
 
 						synchronized (comm.mutex) {
                             checkMigration();
-							remotePoints.setReady(id, true, false);
+							try {
+								remotePoints.setReady(id, true, false);
+							} catch (ConnectException e){
+								this.waitRecuperation();
+							}
 						}
 						break;
 					}
@@ -311,14 +395,23 @@ public class Client extends Thread{
 
 						synchronized (comm.mutex){
 							checkMigration();
-							remotePoints.setQuit(player.id);
+							try {
+								remotePoints.setQuit(player.id);
+							}
+							catch (ConnectException e){
+								this.waitRecuperation();
+							}
 						}
 
 						//waitMigrating();
 
 						synchronized (comm.mutex) {
                             checkMigration();
-							remotePoints.setReady(id, true, true);
+							try {
+								remotePoints.setReady(id, true, true);
+							} catch (ConnectException e){
+								this.waitRecuperation();
+							}
 						}
 						break;
 					}
