@@ -146,4 +146,12 @@ public class Board extends Canvas{
         //buffer.drawImage(img, 0, 0, null);
     }
 
+    public void drawStringWait(String points) {
+        this.paint(getGraphics());
+        this.drawString("The server failed, waiting for it to recuperate" + points);
+        getGraphics().drawImage(img, 0, 0, null);
+        getGraphics().drawImage(score_board, 0, 0, null);
+        System.out.println("Waiting server to respond" + points);
+    }
+
 }
