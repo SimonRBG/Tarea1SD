@@ -10,13 +10,13 @@ import java.util.Stack;
 
 public interface IPoints extends Remote{
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<IPoint>[] l, Stack ids, int numplayers)throws RemoteException;
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers)throws RemoteException;
 
     public Points getPoints() throws RemoteException;
 
-    public  void addPoint(IPoint po, int i) throws RemoteException;
+    public  void addPoint(Point po, int i) throws RemoteException;
 
-    public LinkedHashSet<IPoint>[] getList() throws RemoteException;
+    public LinkedHashSet<Point>[] getList() throws RemoteException;
 
     public int getId() throws RemoteException;
 
