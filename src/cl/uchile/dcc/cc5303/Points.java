@@ -4,8 +4,10 @@ package cl.uchile.dcc.cc5303;
  * Created by pecesito on 12-10-16.
  */
 
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Stack;
@@ -127,11 +129,18 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                 }
                 //Check other points
                 while (it.hasNext()) {
-                    IPoint p2 = (IPoint) it.next();
-                    if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
-                        return false;
+                    try {
+                        IPoint p2 = (IPoint) it.next();
+                        if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
+                            return false;
+                        }
+                        it.remove();
+                    } catch (ConnectException e) {
+                        // Free a space for new player
+                        this.setQuit(i);
+                        // Don't draw the player that we can't connect
+                        break;
                     }
-                    it.remove();
                 }
             }
             return true;
