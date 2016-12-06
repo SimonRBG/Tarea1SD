@@ -213,9 +213,9 @@ public class Client extends Thread{
 
 				boolean allready = false;
 				while(!allready){
-
+					remotePoints.setUpdateValue(id);
 					synchronized (comm.mutex) {
-                        checkMigration();
+						checkMigration();
 						try {
 							allready = remotePoints.allPlayersReady();
 						} catch (ConnectException e){
@@ -224,6 +224,7 @@ public class Client extends Thread{
 					}
 					continue;
 			    }
+				remotePoints.setWaitingResponse(false);
 				System.out.println("All Players Ready!");
 				tablero.wait = false;
 				// Main loop
@@ -370,12 +371,14 @@ public class Client extends Thread{
 				tablero.press=true;
 				tablero.repaint();//paint the points in the board
 
-                while(true) {//wainting for players to decide
+                while(true) {//waiting for players to decide
+					// Verify that it doesn't die
+					remotePoints.setUpdateValue(id);
+					remotePoints.setWaitingResponse(true);
 					if (keys[KeyEvent.VK_Y]) {
 						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
 						//waitMigrating();
-
 						synchronized (comm.mutex) {
                             checkMigration();
 							try {

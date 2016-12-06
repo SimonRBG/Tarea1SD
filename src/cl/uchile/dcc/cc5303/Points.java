@@ -24,6 +24,8 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     public boolean allLost;
     public boolean ready[];
     public int w, h;
+    public HashMap<Integer, Integer> updateValue;
+    public boolean waiting = false;
     boolean someOneQuit;
 
     public Object mutex2 = new Object();
@@ -38,6 +40,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             this.ready = new boolean[n];
             this.allLost = false;
             this.numplayers = n;
+            this.updateValue = new HashMap<Integer, Integer>();
             list = new LinkedHashSet[n];
             for (int i = 0; i < n; i++) {
                 this.looses[i] = false;
@@ -66,6 +69,19 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             return this;
         }
 
+    }
+
+
+    public void setUpdateValue(int ind) throws RemoteException {
+        if (!updateValue.containsKey(ind))
+            this.updateValue.put(ind,0);
+        updateValue.put(ind, updateValue.get(ind)+1);
+    }
+
+    public int getUpdateValue(int ind) throws RemoteException {
+        if (!updateValue.containsKey(ind))
+            this.updateValue.put(ind,0);
+        return  updateValue.get(ind);
     }
 
     public void addPoint(IPoint po, int i) throws RemoteException{
@@ -191,6 +207,17 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             return (int) ids.pop();
         }
     }
+
+    public void setWaitingResponse(boolean val) throws RemoteException {
+        synchronized (mutex2) {
+            this.waiting = val;
+        }
+    }
+
+    public boolean getWaitingResponse() throws RemoteException {
+        return waiting;
+    }
+
 
     public boolean allPlayersReady() throws RemoteException{
         synchronized (mutex2) {

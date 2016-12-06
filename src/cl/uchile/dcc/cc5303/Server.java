@@ -10,6 +10,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.Stack;
 
 import com.sun.management.OperatingSystemMXBean;
@@ -64,7 +65,10 @@ public class Server extends Thread{
             System.out.println("Objeto points publicado en: " + url_server);
 
             c.setServer_ready(true);
-
+            ArrayList<Integer> old_values = new ArrayList<>();
+            for (int i=0; i < points.getNumPlayers(); i++) {
+                old_values.add(0);
+            }
             com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             while (true) {
                 if (bean == null)
@@ -79,6 +83,18 @@ public class Server extends Thread{
                 charge_CPU = bean.getSystemCpuLoad();
                 System.out.println("CPU charge : " + charge_CPU);
 
+                // Verify that any client is still working and if not, make the quit for them
+                int o = 0;
+
+                if (points.getWaitingResponse()) {
+
+                    while (o < points.getNumPlayers()) {
+                        if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0)
+                            points.setQuit(o);
+                        old_values.set(o, points.getUpdateValue(o));
+                        o++;
+                    }
+                }
                 // First step : First reason to migrate : CPU_charge. Second reason : someOneQuit
                 if ((charge_CPU > 0.75 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
                     // then migrate to another server

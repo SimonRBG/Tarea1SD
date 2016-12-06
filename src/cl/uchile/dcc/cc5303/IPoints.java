@@ -14,11 +14,19 @@ public interface IPoints extends Remote{
 
     public Points getPoints() throws RemoteException;
 
+    public void setUpdateValue (int ind) throws RemoteException;
+
+    public int getUpdateValue (int ind) throws RemoteException;
+
     public  void addPoint(IPoint po, int i) throws RemoteException;
 
     public LinkedHashSet<IPoint>[] getList() throws RemoteException;
 
     public int getId() throws RemoteException;
+
+    public void setWaitingResponse(boolean val) throws RemoteException;
+
+    public boolean getWaitingResponse() throws RemoteException;
 
     public int getScore(int id) throws RemoteException;
 
