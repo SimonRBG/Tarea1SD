@@ -86,7 +86,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 notifyOperation("player " + i + " lost!!");
                 if (checkAllPlayers()) {
                     this.allLost = true;
-                    notifyOperation("all Lost");
+                    notifyOperation("all Lostttt");
                     //TODO borrar todo y empezar de nuevo
                 }
             }
@@ -133,6 +133,8 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 while (it.hasNext()) {
                     Point p2 = (Point) it.next();
                     if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
+                        System.out.println(p);
+                        System.out.println(p2);
                         return false;
                     }
                     it.remove();
@@ -316,8 +318,11 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
     }
 
-    public Points(String s) throws RemoteException {
+    public Points(String s, int w, int h)  throws RemoteException {
+
         synchronized (mutex2) {
+            this.w = w;
+            this.h = h;
             String[] sa = s.split(";");
             //SomeOneQuit:0; NumPlayers:2; Scores:[-1 -1 ]; Looses:[0 0 ]; Ready:[0 0 ]; AllLost:0; Ids:[1, 0]; List:[][];
             try {
@@ -393,19 +398,22 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
                 String slist = sa[7].split(":")[1];
                 String[] sslist = slist.split(",");
+                list = null;
                 this.list = new LinkedHashSet[numplayers];
                 for (int i = 0; i < sslist.length; i++) {
                     try {
                         list[i] = new LinkedHashSet<Point>();
                         String[] ssslist = sslist[i].split("Point");
                         System.out.println("Points player "+ i);
-                        for (int j = 0; j < ssslist.length; j++) {
-                            Point p = new Point(ssslist[j]);
-                            if(p!=null) {
-                                list[i].add(p);
-                                System.out.print("Point: "+p.toString()+" ");
-                            }else{
-                                System.out.print("null point:" +ssslist[j]+" ");
+                        for (int j = 1; j < ssslist.length; j++) {
+                            if(ssslist[j]!=" ") {
+                                Point p = new Point(ssslist[j]);
+                                if (p != null) {
+                                    list[i].add(p);
+                                    System.out.print("Point: " + p.toString() + " ");
+                                } else {
+                                    System.out.print("null point:" + ssslist[j] + " ");
+                                }
                             }
                         }
                     }catch (NullPointerException e){

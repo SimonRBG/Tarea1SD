@@ -70,16 +70,16 @@ public class Server extends Thread{
 
             com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
-            int save = 11;
+            //int save = 11;
             while (true) {
                 if (bean == null)
                     throw new NullPointerException("Unable to collect operating system metrics, jmx bean is null");
 
-                if(save >= 3){
+                //if(save >= 3){
                     saveState();
-                    save = 0;
-                }
-                save ++;
+                //    save = 0;
+                //}
+               // save ++;
                 try {
                     // We sleep to not surcharge the server's CPU charge
                     this.sleep(1000);
@@ -255,7 +255,7 @@ public class Server extends Thread{
                 String line = br.readLine();
                 if(line != null && !line.isEmpty()) {
                     System.out.println(line);
-                    Points ps = new Points(line);
+                    Points ps = new Points(line, w, h);
                     if (ps != null) {
                         points = ps;
                         Naming.rebind(url_server, points);

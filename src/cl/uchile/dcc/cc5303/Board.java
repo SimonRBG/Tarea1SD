@@ -66,7 +66,7 @@ public class Board extends Canvas{
         this.buffer_score.fillRect(0, 0, (int) (getWidth()*0.25), getHeight());
 
         // dibujar elementos del juego
-        draw(points, scores, numplayers);
+        draw();
         if(!this.serverDown){
             if(this.press){
                 drawString("Press Y to continue, Q to Quit");
@@ -91,14 +91,14 @@ public class Board extends Canvas{
 
     }
 
-    private void draw(LinkedHashSet<Point>[] points, int scores[], int numplayers){
+    private void draw(){
 
         drawScores();
 
         if(points==null) {
             return;
         }
-
+        try{
         for(int j = 0; j < numplayers; j++) {
             buffer.setColor(colors[j]);
             LinkedHashSet<Point> l = points[j];
@@ -112,6 +112,9 @@ public class Board extends Canvas{
                     e.printStackTrace();
                 }
             }
+        }
+        }catch(NullPointerException e){
+            System.out.println("NPE en tablero");
         }
 
     }

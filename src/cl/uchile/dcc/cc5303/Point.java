@@ -43,9 +43,11 @@ public class Point implements Serializable {
 
     @Override
     public String toString() {
-        return new StringBuffer(this.x).append(" ")
+        String p = new StringBuffer().append(this.x).append(" ")
                 .append(this.y).append(" ")
                 .append(this.visible?1:0).toString();
+        //System.out.println("Point: "+p);
+        return p;
     }
 
 
