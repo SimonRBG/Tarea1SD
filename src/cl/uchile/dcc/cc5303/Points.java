@@ -71,28 +71,34 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public void addPoint(Point po, int i) throws RemoteException{
-
-        if (po==null)
-            return;
-        // If the point doesn't choc with another one
-        synchronized (mutex2) {
-            if (check(po)) {
-                list[i].add(po);
-            } else {
-                // Clear all the snake, save tha it lost and telling to the other to update their score
-                list[i].clear();
-                this.looses[i] = true;
-                notify_score(i);
-                notifyOperation("player " + i + " lost!!");
-                if (checkAllPlayers()) {
-                    this.allLost = true;
-                    notifyOperation("all Lostttt");
-                    //TODO borrar todo y empezar de nuevo
+        try {
+            if (po == null)
+                return;
+            // If the point doesn't choc with another one
+            synchronized (mutex2) {
+                if (check(po)) {
+                    list[i].add(po);
+                } else {
+                    // Clear all the snake, save tha it lost and telling to the other to update their score
+                    list[i].clear();
+                    this.looses[i] = true;
+                    notify_score(i);
+                    notifyOperation("player " + i + " lost!!");
+                    if (checkAllPlayers()) {
+                        this.allLost = true;
+                        notifyOperation("all Lostttt");
+                        //TODO borrar todo y empezar de nuevo
+                    }
                 }
             }
-        }
 
-        notifyOperation("new Point Added"+po.getX()+", "+po.getY()+", "+po.getVisible()+". id: "+i);
+            notifyOperation("new Point Added" + po.getX() + ", " + po.getY() + ", " + po.getVisible() + ". id: " + i);
+        }catch(NullPointerException e){
+            System.out.println(list);
+            System.out.println(list[i]);
+            System.out.println("NPE en Points");
+            e.printStackTrace();
+        }
     }
 
     public boolean lost(int id)throws RemoteException{
@@ -400,9 +406,10 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 String[] sslist = slist.split(",");
                 list = null;
                 this.list = new LinkedHashSet[numplayers];
-                for (int i = 0; i < sslist.length; i++) {
-                    try {
-                        list[i] = new LinkedHashSet<Point>();
+
+                for (int i = 0; i < numplayers; i++) {
+                    list[i] = new LinkedHashSet<Point>();
+                    try{
                         String[] ssslist = sslist[i].split("Point");
                         System.out.println("Points player "+ i);
                         for (int j = 1; j < ssslist.length; j++) {
@@ -418,6 +425,8 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         }
                     }catch (NullPointerException e){
                         System.out.println("no list found for player "+ i);
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        System.out.println("no list for player "+ i);
                     }
                 }
             } catch (Exception e) {

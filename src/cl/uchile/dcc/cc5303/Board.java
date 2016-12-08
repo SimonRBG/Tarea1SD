@@ -115,6 +115,7 @@ public class Board extends Canvas{
         }
         }catch(NullPointerException e){
             System.out.println("NPE en tablero");
+            e.printStackTrace();
         }
 
     }

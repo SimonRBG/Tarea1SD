@@ -257,17 +257,19 @@ public class Client extends Thread{
 					int posy = random.nextInt(h);
 					System.out.println(posx + " - " + posy);
 					player = new Player(new Point(posx, posy), id);
-				}
-				//set me ready
-				synchronized (comm.mutex) {
-                    checkMigration();
-					try {
-						remotePoints.setReady(id, true, false);
-					} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
-						this.waitRecuperation();
-						continue kp;
+
+					//set me ready
+					synchronized (comm.mutex) {
+						checkMigration();
+						try {
+							remotePoints.setReady(id, true, false);
+						} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
+							this.waitRecuperation();
+							continue kp;
+						}
 					}
 				}
+
 				//wait for others
 				boolean allready = false;
 				while(!allready){
@@ -322,15 +324,17 @@ public class Client extends Thread{
 							synchronized (comm.mutex) {
 								checkMigration();
 								try {
-									player.ended = remotePoints.lost(id);
+									//player.ended = remotePoints.lost(id);
+									boolean ready=true;
+									remotePoints.setReady(id, ready, true);
 								} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 									this.waitRecuperation();
 									continue kp;
 								}
 							}
 							keepPlaying = false;
-
-							System.exit(0);
+							break kp;
+							//System.exit(0);
 						}
 						++frames;
 
@@ -448,13 +452,12 @@ public class Client extends Thread{
 				tablero.repaint();//paint the points in the board
 
 				boolean ready = false;
+				ready:
                 while(!ready){
                 	//wainting for players to decide
-					if (keys[KeyEvent.VK_Y]) {
+					if (keys[KeyEvent.VK_Y]){
 						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
-						//waitMigrating();
-
 						synchronized (comm.mutex) {
                             checkMigration();
 							try {
@@ -462,7 +465,7 @@ public class Client extends Thread{
 								remotePoints.setReady(id, ready, false);
 							} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();
-								continue kp;
+								continue ready;
 							}
 						}
 						break;
@@ -470,35 +473,21 @@ public class Client extends Thread{
 					if (keys[KeyEvent.VK_Q]) {
 						System.out.println("bye-bye");
 						keepPlaying = false;
-
 						synchronized (comm.mutex){
 							checkMigration();
 							try {
-								ready=true;
+								//ready=true;
 								remotePoints.setQuit(id);
 							}
 							catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();
-								continue kp;
-							}
-						}
-
-						//waitMigrating();
-
-						synchronized (comm.mutex) {
-                            checkMigration();
-							try {
-								ready=true;
-								remotePoints.setReady(id, ready, true);
-							} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
-								this.waitRecuperation();
-								continue kp;
+								continue ready;
 							}
 						}
 						break;
 					}
 					try {
-						this.sleep(1000 / UPDATE_RATE);
+						this.sleep(1000);
 					} catch (InterruptedException ex) {
 						ex.printStackTrace();
 					}
