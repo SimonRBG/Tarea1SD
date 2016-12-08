@@ -177,15 +177,17 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     // Gave a new id for 5 users
     public int getId() throws RemoteException{
         synchronized (mutex2) {
-
-            int id = (int) ids.peek();
+            int id = (int)ids.pop();
             notifyOperation("new id " + id);
             scores[id] = 0;
             this.ready[id] = true;
             this.looses[id] = false;
-            return (int) ids.pop();
+            System.out.println("ids:" + ids);
+            return id;
+
         }
     }
+
 
     public boolean allPlayersReady() throws RemoteException{
         synchronized (mutex2) {
@@ -219,6 +221,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             }
             // Id available & reinitilize the score
             ids.push(new Integer(id));
+
             this.scores[id] = -1;
             this.ready[id] = true;
             this.someOneQuit = true;
@@ -278,8 +281,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
 
             sb.append("Ids:");
-            for (int i = 0; i < ids.size(); i++) {
-                sb.append(ids.get(i)).append(" ");
+            System.out.println("ids:"+this.ids);
+            for (int i = 0; i < this.ids.size(); i++) {
+                sb.append(this.ids.get(i)).append(" ");
             }
             sb.append(";");
 
@@ -295,7 +299,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                             System.out.println("no Point found");
                         }
                     }
-                }catch(NullPointerException e){
+                }catch(NullPointerException | ArrayIndexOutOfBoundsException e){
                     System.out.println("no list for player" + i);
                 }
                 sb.append(",");
@@ -315,71 +319,99 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     public Points(String s) throws RemoteException {
         synchronized (mutex2) {
             String[] sa = s.split(";");
-
             //SomeOneQuit:0; NumPlayers:2; Scores:[-1 -1 ]; Looses:[0 0 ]; Ready:[0 0 ]; AllLost:0; Ids:[1, 0]; List:[][];
             try {
                 someOneQuit = (Integer.parseInt(sa[0].split(":")[1]) == 0) ? false : true;
+                System.out.println("someOneQuit: " + someOneQuit);
+
                 numplayers = Integer.parseInt(sa[1].split(":")[1]);
+                System.out.println("numPlayers: "+ numplayers);
+
 
                 String sscores = sa[2].split(":")[1];
                 String[] ssscores = sscores.split(" ");
-                System.out.println(sscores);
+                //System.out.println(sscores);
                 scores = new int[numplayers];
+                System.out.print("scores: ");
                 for (int i = 0; i < numplayers; i++) {
-                    System.out.println(ssscores[i]);
                     scores[i] = Integer.parseInt(ssscores[i]);
-
+                    System.out.print(scores[i]);
                 }
-
+                System.out.println();
                 String slooses = sa[3].split(":")[1];
                 String[] sslooses = slooses.split(" ");
                 looses = new boolean[numplayers];
+                System.out.print("looses: ");
                 for (int i = 0; i < numplayers; i++) {
                     looses[i] = (Integer.parseInt(sslooses[i]) == 0) ? false : true;
+                    System.out.print(looses[i]+" ");
                 }
+                System.out.println();
 
 
                 String sready = sa[4].split(":")[1];
                 String[] ssready = sready.split(" ");
                 ready = new boolean[numplayers];
+                System.out.print("ready: ");
                 for (int i = 0; i < numplayers; i++) {
                     ready[i] = (Integer.parseInt(ssready[i]) == 0) ? false : true;
+                    System.out.print(ready[i]+" ");
                 }
+                System.out.println();
+
 
                 allLost = (Integer.parseInt(sa[5].split(":")[1]) == 0) ? false : true;
+                System.out.println("allLost: "+allLost);
 
 
-                String sids = sa[6].split(":")[1];
-                String[] ssids = sids.split(" ");
-                System.out.println(sids);
-                ids = new Stack();
-                for (int i = ssids.length-1; i >= 0; i--) {
+                this.ids = new Stack();
+                String sids;
+                System.out.print("ids:");
+                try {
+                    sids = sa[6].split(":")[1];
+                    String[] ssids = sids.split(" ");
+
+                    for (int i = 0; i < ssids.length; i++) {
+                        ids.push(Integer.parseInt(ssids[i]));
+                        System.out.print(" " + ssids[i]);
+                    }
+
+                    //System.out.println("ids:"+ids.toString());
+                /*for (int i = ssids.length-1; i >= 0; i--) {
                     ids.push(ssids[i]);
+                }*/
+                }catch (ArrayIndexOutOfBoundsException e){
+                    System.out.print( "no ids");
                 }
+                System.out.println();
+                //System.out.println(sids);
+                //ids.clear();
+
+
+
 
 
                 String slist = sa[7].split(":")[1];
                 String[] sslist = slist.split(",");
-                list = new LinkedHashSet[numplayers];
+                this.list = new LinkedHashSet[numplayers];
                 for (int i = 0; i < sslist.length; i++) {
                     try {
                         list[i] = new LinkedHashSet<Point>();
                         String[] ssslist = sslist[i].split("Point");
+                        System.out.println("Points player "+ i);
                         for (int j = 0; j < ssslist.length; j++) {
-
                             Point p = new Point(ssslist[j]);
                             if(p!=null) {
                                 list[i].add(p);
+                                System.out.print("Point: "+p.toString()+" ");
                             }else{
-                                System.out.println("null point:" +ssslist[j]);
+                                System.out.print("null point:" +ssslist[j]+" ");
                             }
                         }
                     }catch (NullPointerException e){
                         System.out.println("no list found for player "+ i);
                     }
                 }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }

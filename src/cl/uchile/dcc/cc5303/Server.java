@@ -258,6 +258,7 @@ public class Server extends Thread{
                     Points ps = new Points(line);
                     if (ps != null) {
                         points = ps;
+                        Naming.rebind(url_server, points);
                     }
                     else{
                         System.out.println("null points: "+ line);
