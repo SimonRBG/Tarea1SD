@@ -43,18 +43,22 @@ public class Point implements Serializable {
 
     @Override
     public String toString() {
-        return new StringBuffer(this.x).append(" ")
+        return new StringBuffer("").append(this.x).append(" ")
                 .append(this.y).append(" ")
                 .append(this.visible?1:0).toString();
     }
 
 
     public Point(String s){
-        String[] sa = s.split(" ");
+        String[] sa = s.trim().split(" ");
+        System.out.println(s);
+        System.out.println(sa[0]+" "+sa[1]+ " "+ sa[2]);
         try {
-            x = Integer.parseInt(sa[0]);
-            y = Integer.parseInt(sa[1]);
-            visible = (Integer.parseInt(sa[2]) == 1) ? true : false;
+            this.x = Integer.parseInt(sa[0].trim());
+            this.y = Integer.parseInt(sa[1].trim());
+            this.visible = (Integer.parseInt(sa[2].trim()) == 1) ? true : false;
+        }catch(NumberFormatException e){
+            e.printStackTrace();
         }catch(Exception e){
             e.printStackTrace();
         }

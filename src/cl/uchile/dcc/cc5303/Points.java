@@ -283,12 +283,17 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             }
             sb.append(";");
 
-            sb.append(" List: ");
+            sb.append(" List:");
             for (int i = 0; i < numplayers; i++) {
-                Iterator it = list[i].iterator();
-                while (it.hasNext()) {
-                    Point p = (Point) it.next();
-                    sb.append(" Point: ").append(p.toString());
+                try {
+                    Iterator it = list[i].iterator();
+
+                    while (it.hasNext()) {
+                        Point p = (Point) it.next();
+                        sb.append("Point").append(p.toString());
+                    }
+                }catch(NullPointerException e){
+                    System.out.println("mala lista");
                 }
                 sb.append(",");
             }
@@ -310,57 +315,76 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
             //SomeOneQuit:0; NumPlayers:2; Scores:[-1 -1 ]; Looses:[0 0 ]; Ready:[0 0 ]; AllLost:0; Ids:[1, 0]; List:[][];
             try {
-                someOneQuit = (Integer.parseInt(sa[0].split(":")[1]) == 0) ? false : true;
-                numplayers = Integer.parseInt(sa[1].split(":")[1]);
+                this.someOneQuit = (Integer.parseInt(sa[0].split(":")[1].trim()) == 0) ? false : true;
+                this.numplayers = Integer.parseInt(sa[1].split(":")[1].trim());
 
-                String sscores = sa[2].split(":")[1];
+                String sscores = sa[2].split(":")[1].trim();
                 String[] ssscores = sscores.split(" ");
                 System.out.println(sscores);
-                scores = new int[numplayers];
-                for (int i = 0; i < numplayers; i++) {
+                this.scores = new int[this.numplayers];
+                for (int i = 0; i < this.numplayers; i++) {
                     System.out.println(ssscores[i]);
-                    scores[i] = Integer.parseInt(ssscores[i]);
+                    this.scores[i] = Integer.parseInt(ssscores[i]);
 
                 }
 
-                String slooses = sa[3].split(":")[1];
+                String slooses = sa[3].split(":")[1].trim();
                 String[] sslooses = slooses.split(" ");
-                looses = new boolean[numplayers];
-                for (int i = 0; i < numplayers; i++) {
-                    looses[i] = (Integer.parseInt(sslooses[i]) == 0) ? false : true;
+                this.looses = new boolean[this.numplayers];
+                for (int i = 0; i < this.numplayers; i++) {
+                    this.looses[i] = (Integer.parseInt(sslooses[i].trim()) == 0) ? false : true;
                 }
 
 
-                String sready = sa[4].split(":")[1];
+                String sready = sa[4].split(":")[1].trim();
                 String[] ssready = sready.split(" ");
-                ready = new boolean[numplayers];
-                for (int i = 0; i < numplayers; i++) {
-                    ready[i] = (Integer.parseInt(ssready[i]) == 0) ? false : true;
+                this.ready = new boolean[this.numplayers];
+                for (int i = 0; i < this.numplayers; i++) {
+                    this.ready[i] = (Integer.parseInt(ssready[i].trim()) == 0) ? false : true;
                 }
 
-                allLost = (Integer.parseInt(sa[5].split(":")[1]) == 0) ? false : true;
+                this.allLost = (Integer.parseInt(sa[5].split(":")[1].trim()) == 0) ? false : true;
 
 
-                String sids = sa[6].split(":")[1];
+                String sids = sa[6].split(":")[1].trim();
                 String[] ssids = sids.split(" ");
                 System.out.println(sids);
-                ids = new Stack();
-                for (int i = ssids.length; i > 0; i--) {
-                    ids.push(ssids[i]);
-                }
-
-
-                String slist = sa[7].split(":")[1];
-                String[] sslist = slist.split(", ");
-                list = new LinkedHashSet[numplayers];
-                for (int i = 0; i < numplayers; i++) {
-                    list[i] = new LinkedHashSet<Point>();
-                    String[] ssslist = sslist[i].split("Point ");
-                    for (int j = 0; j < sslist.length; j++) {
-                        Point p = new Point(ssslist[j]);
-                        list[i].add(p);
+                this.ids = new Stack();
+                for (int i = ssids.length-1; i >= 0; i--) {
+                    try {
+                        this.ids.push(Integer.parseInt(ssids[i].trim()));
+                    }catch(NumberFormatException e){
+                        System.out.println("mala id");
                     }
                 }
+
+
+                String slist = sa[7].split(":")[1].trim();
+                System.out.println("slist"+slist);
+                String[] sslist = slist.split(",");
+                this.list = new LinkedHashSet[this.numplayers];
+                for (int i = 0; i < sslist.length; i++) {
+                    this.list[i] = new LinkedHashSet<Point>();
+                    String[] ssslist = sslist[i].trim().split("Point");
+                    for (int j = 0; j < ssslist.length; j++) {
+                        String sp = ssslist[j].trim();
+                        System.out.println("point: "+sp);
+                        if(sp=="" || sp == null){
+                            continue;
+                        }
+                        try {
+                            Point p = new Point(sp);
+                            this.list[i].add(p);
+
+                        }catch(ArrayIndexOutOfBoundsException e){
+                            System.out.println("ArrayIndexOutOfBoundsException");
+                        }
+
+                    }
+
+                }
+                System.out.println(list.toString());
+                System.out.println("finish Creating Points");
 
 
             } catch (Exception e) {
