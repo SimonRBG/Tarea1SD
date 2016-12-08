@@ -55,6 +55,9 @@ public class Point implements Serializable {
             x = Integer.parseInt(sa[0]);
             y = Integer.parseInt(sa[1]);
             visible = (Integer.parseInt(sa[2]) == 1) ? true : false;
+            System.out.println("Point: "+x +","+y+","+visible+";");
+        }catch(NumberFormatException e){
+            System.out.println("not a number: "+ sa);
         }catch(Exception e){
             e.printStackTrace();
         }

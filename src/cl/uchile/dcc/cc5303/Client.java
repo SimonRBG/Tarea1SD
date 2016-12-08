@@ -11,6 +11,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.EmptyStackException;
 import java.util.Random;
+import java.rmi.ConnectIOException;
 
 public class Client extends Thread{
 /**
@@ -91,18 +92,47 @@ public class Client extends Thread{
 
 	public void waitRecuperation(){
 		String points = "";
-		tablero.drawStringWait(points);
+		tablero.serverDown = true;
+		//tablero.drawStringWait(points);
 		boolean serverRecup = false;
 		while (!serverRecup) {
 			// TODO : Verify with the function if the server is recuperating
 			this.sleep();
-			points+=".";
+			/*points+=".";
 			if (points.length() > 3)
 				points="";
-			tablero.drawStringWait(points);
+			tablero.drawStringWait();
+			*/
+			tablero.paint(tablero.getGraphics());
+			tablero.p = (tablero.p+1)%3;
+
+			try {
+				String newUrl = comm.getActual_url_server();
+				url_server = newUrl;
+			}catch(RemoteException e){
+				System.out.println("Unable to connect to Coordinator");
+				continue;
+			}
+			try {
+				remotePoints = (IPoints) Naming.lookup(url_server);
+				try {
+					if (comm.getServer_ready()) {
+						serverRecup = true;
+						tablero.serverDown = false;
+
+						// TODO : do the treatment to recupare all points
+					}
+				}catch(RemoteException e){
+					System.out.println("Unable to connect to Coordinator");
+					continue;
+				}
+			}catch( NotBoundException | MalformedURLException| RemoteException e){
+				continue;
+			}
 		}
+		tablero.paint(tablero.getGraphics());
 		System.out.println();
-		// TODO : do the treatment to recupare all points
+
 	}
 
     public void checkMigration(){
@@ -113,7 +143,7 @@ public class Client extends Thread{
 				url_server = newUrl;
 				try {
 					remotePoints = (IPoints) Naming.lookup(url_server);
-				} catch (ConnectException e){
+				} catch (ConnectException | java.rmi.UnmarshalException e){
 					this.waitRecuperation();
 				}
 			}
@@ -154,7 +184,7 @@ public class Client extends Thread{
 				// Recuperation of the shared object
 				try {
 					remotePoints = (IPoints) Naming.lookup(url_server);
-				} catch (ConnectException e){
+				} catch (ConnectException | java.rmi.UnmarshalException e){
 					this.waitRecuperation();
 				}
 			}
@@ -165,7 +195,7 @@ public class Client extends Thread{
                 checkMigration();
 				try {
 					this.tablero.numplayers = remotePoints.getNumPlayers();
-				} catch (ConnectException e){
+				} catch (ConnectException | java.rmi.UnmarshalException e){
 					this.waitRecuperation();
 				}
 			}
@@ -177,7 +207,8 @@ public class Client extends Thread{
                     checkMigration();
 					try {
 						id = remotePoints.getId();
-					} catch (ConnectException e){
+						tablero.id = id;
+					} catch (ConnectException | java.rmi.UnmarshalException e){
 						this.waitRecuperation();
 					}
 
@@ -207,7 +238,7 @@ public class Client extends Thread{
                     checkMigration();
 					try {
 						remotePoints.setReady(id, true, false);
-					} catch (ConnectException e){
+					} catch (ConnectException | java.rmi.UnmarshalException e){
 						this.waitRecuperation();;
 					}
 				}
@@ -221,8 +252,8 @@ public class Client extends Thread{
                         checkMigration();
 						try {
 							allready = remotePoints.allPlayersReady();
-						} catch (ConnectException e){
-							this.waitRecuperation();;
+						} catch (ConnectException | java.rmi.UnmarshalException e){
+							this.waitRecuperation();
 						}
 					}
 					continue;
@@ -248,7 +279,7 @@ public class Client extends Thread{
 								checkMigration();
 								try {
 									remotePoints.setQuit(player.id);
-								} catch (ConnectException e){
+								} catch (ConnectException | java.rmi.UnmarshalException e){
 									this.waitRecuperation();
 								}
 							}
@@ -256,7 +287,7 @@ public class Client extends Thread{
 								checkMigration();
 								try {
 									player.ended = remotePoints.lost(id);
-								} catch (ConnectException e){
+								} catch (ConnectException | java.rmi.UnmarshalException e){
 									this.waitRecuperation();
 								}
 							}
@@ -285,7 +316,7 @@ public class Client extends Thread{
                                 checkMigration();
 								try {
 									remotePoints.addPoint(new_point, id);
-								} catch (ConnectException e){
+								} catch (ConnectException | java.rmi.UnmarshalException | ConnectIOException e){
 									this.waitRecuperation();
 								}
 							}
@@ -301,7 +332,7 @@ public class Client extends Thread{
                         checkMigration();
 						try {
 							tablero.scores = remotePoints.getScores();
-						}catch (ConnectException e){
+						}catch (ConnectException | java.rmi.UnmarshalException e){
 							this.waitRecuperation();
 						}
 					}
@@ -313,7 +344,7 @@ public class Client extends Thread{
                         checkMigration();
 						try {
 							tablero.points = remotePoints.getList();
-						} catch (ConnectException e){
+						} catch (ConnectException | java.rmi.UnmarshalException e){
 							this.waitRecuperation();
 						}
 					}
@@ -323,7 +354,7 @@ public class Client extends Thread{
                         checkMigration();
 						try {
 							player.ended = remotePoints.lost(id);
-						} catch (ConnectException e){
+						} catch (ConnectException | java.rmi.UnmarshalException e){
 							this.waitRecuperation();
 						}
 					}
@@ -339,7 +370,7 @@ public class Client extends Thread{
                             checkMigration();
 							try {
 								allLost = remotePoints.allLost();
-							} catch (ConnectException e){
+							} catch (ConnectException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();
 							}
 						}
@@ -364,7 +395,7 @@ public class Client extends Thread{
                     checkMigration();
 					try {
 						remotePoints.setReady(id, false, true);
-					} catch (ConnectException e){
+					} catch (ConnectException | java.rmi.UnmarshalException e){
 						this.waitRecuperation();
 					}
 				}
@@ -373,7 +404,8 @@ public class Client extends Thread{
 				tablero.press=true;
 				tablero.repaint();//paint the points in the board
 
-                while(true) {//wainting for players to decide
+                while(true) {
+                	//wainting for players to decide
 					if (keys[KeyEvent.VK_Y]) {
 						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
@@ -383,7 +415,7 @@ public class Client extends Thread{
                             checkMigration();
 							try {
 								remotePoints.setReady(id, true, false);
-							} catch (ConnectException e){
+							} catch (ConnectException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();
 							}
 						}
@@ -398,7 +430,7 @@ public class Client extends Thread{
 							try {
 								remotePoints.setQuit(player.id);
 							}
-							catch (ConnectException e){
+							catch (ConnectException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();
 							}
 						}
@@ -409,7 +441,7 @@ public class Client extends Thread{
                             checkMigration();
 							try {
 								remotePoints.setReady(id, true, true);
-							} catch (ConnectException e){
+							} catch (ConnectException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();
 							}
 						}

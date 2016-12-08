@@ -248,10 +248,10 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     @Override
     public String toString() {
         synchronized (mutex2) {
-            StringBuffer sb = new StringBuffer(" SomeOneQuit: ").append(this.someOneQuit ? 1 : 0).append(";");
-            sb.append(" NumPlayers: ").append(numplayers).append(";");
+            StringBuffer sb = new StringBuffer("SomeOneQuit:").append(this.someOneQuit ? 1 : 0).append(";");
+            sb.append("NumPlayers:").append(numplayers).append(";");
 
-            sb.append(" Scores: ");
+            sb.append("Scores:");
 
             for (int i = 0; i < numplayers; i++) {
                 sb.append(this.scores[i]);
@@ -259,14 +259,14 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             }
             sb.append(";");
 
-            sb.append(" Looses: ");
+            sb.append("Looses:");
             for (int i = 0; i < numplayers; i++) {
                 sb.append(this.looses[i] ? 1 : 0);
                 sb.append(" ");
             }
             sb.append(";");
 
-            sb.append(" Ready: ");
+            sb.append("Ready:");
             sb.append("");
             for (int i = 0; i < numplayers; i++) {
                 sb.append(this.ready[i] ? 1 : 0);
@@ -274,21 +274,29 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             }
             sb.append(";");
 
-            sb.append(" AllLost: ").append(allLost ? 1 : 0).append(";");
+            sb.append("AllLost:").append(allLost ? 1 : 0).append(";");
 
 
-            sb.append(" Ids: ");
+            sb.append("Ids:");
             for (int i = 0; i < ids.size(); i++) {
                 sb.append(ids.get(i)).append(" ");
             }
             sb.append(";");
 
-            sb.append(" List: ");
+            sb.append("List:");
             for (int i = 0; i < numplayers; i++) {
-                Iterator it = list[i].iterator();
-                while (it.hasNext()) {
-                    Point p = (Point) it.next();
-                    sb.append(" Point: ").append(p.toString());
+                try {
+                    Iterator it = list[i].iterator();
+                    while (it.hasNext()) {
+                        try {
+                            Point p = (Point) it.next();
+                            sb.append("Point").append(p.toString());
+                        } catch (NullPointerException e) {
+                            System.out.println("no Point found");
+                        }
+                    }
+                }catch(NullPointerException e){
+                    System.out.println("no list for player" + i);
                 }
                 sb.append(",");
             }
@@ -345,20 +353,29 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 String[] ssids = sids.split(" ");
                 System.out.println(sids);
                 ids = new Stack();
-                for (int i = ssids.length; i > 0; i--) {
+                for (int i = ssids.length-1; i >= 0; i--) {
                     ids.push(ssids[i]);
                 }
 
 
                 String slist = sa[7].split(":")[1];
-                String[] sslist = slist.split(", ");
+                String[] sslist = slist.split(",");
                 list = new LinkedHashSet[numplayers];
-                for (int i = 0; i < numplayers; i++) {
-                    list[i] = new LinkedHashSet<Point>();
-                    String[] ssslist = sslist[i].split("Point ");
-                    for (int j = 0; j < sslist.length; j++) {
-                        Point p = new Point(ssslist[j]);
-                        list[i].add(p);
+                for (int i = 0; i < sslist.length; i++) {
+                    try {
+                        list[i] = new LinkedHashSet<Point>();
+                        String[] ssslist = sslist[i].split("Point");
+                        for (int j = 0; j < ssslist.length; j++) {
+
+                            Point p = new Point(ssslist[j]);
+                            if(p!=null) {
+                                list[i].add(p);
+                            }else{
+                                System.out.println("null point:" +ssslist[j]);
+                            }
+                        }
+                    }catch (NullPointerException e){
+                        System.out.println("no list found for player "+ i);
                     }
                 }
 

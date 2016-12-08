@@ -17,6 +17,9 @@ public class Board extends Canvas{
     public boolean wait, press,bye;
     private Color[] colors;
 
+    public int id = 0;
+    public boolean serverDown = false;
+
     // doble buffer para dibujar
     public Image img;
     public Image score_board;
@@ -37,6 +40,7 @@ public class Board extends Canvas{
         colors[3] = Color.green;
         colors[4] = Color.cyan;
         this.dHip = dHip;
+        serverDown = false;
 
     }
 
@@ -45,6 +49,8 @@ public class Board extends Canvas{
         paint(graphics);
     }
 
+
+    public int p = 0;
     @Override
     public void paint(Graphics graphics) {
         if(this.buffer==null){
@@ -61,14 +67,23 @@ public class Board extends Canvas{
 
         // dibujar elementos del juego
         draw(points, scores, numplayers);
-        if(this.press){
-            drawString("Press Y to continue, Q to Quit");
-        }
-        if(this.wait){
-            drawString("Waiting for other players...");
-        }
-        if(this.bye){
-            drawString("Bye Bye!!");
+        if(!this.serverDown){
+            if(this.press){
+                drawString("Press Y to continue, Q to Quit");
+            }else
+            if(this.wait){
+                drawString("Waiting for other players...");
+            }else
+            if(this.bye){
+                drawString("Bye Bye!!");
+            }
+        }else{
+            String s = "The server failed, waiting for it to recuperate";
+            for(int i=0; i<p; i++){
+                s = s+".";
+            }
+            drawString(s);
+            System.out.println(s);
         }
         graphics.drawImage(img, 0, 0, null);
         graphics.drawImage(score_board, 0, 0, null);
@@ -140,18 +155,15 @@ public class Board extends Canvas{
 
 
     public void drawString(String s) {
-        buffer.setColor(Color.red);
+        buffer.setColor(colors[id]);
         buffer.drawString(s, width/3, height/2);
         System.out.println("drawingString");
-        //buffer.drawImage(img, 0, 0, null);
+        buffer.drawImage(img, 0, 0, null);
     }
 
-    public void drawStringWait(String points) {
-        this.paint(getGraphics());
-        this.drawString("The server failed, waiting for it to recuperate" + points);
-        getGraphics().drawImage(img, 0, 0, null);
-        getGraphics().drawImage(score_board, 0, 0, null);
-        System.out.println("Waiting server to respond" + points);
-    }
+
+
+
+
 
 }

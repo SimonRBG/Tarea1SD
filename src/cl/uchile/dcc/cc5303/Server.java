@@ -62,7 +62,7 @@ public class Server extends Thread{
 
         try{
 
-            //loadState();
+            loadState();
 
             System.out.println("Objeto points publicado en: " + url_server);
 
@@ -258,6 +258,9 @@ public class Server extends Thread{
                     Points ps = new Points(line);
                     if (ps != null) {
                         points = ps;
+                    }
+                    else{
+                        System.out.println("null points: "+ line);
                     }
                 }
 

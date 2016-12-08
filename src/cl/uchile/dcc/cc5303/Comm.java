@@ -102,15 +102,20 @@ public class Comm extends UnicastRemoteObject implements IComm{
         }
     }
 
+
     public int addServer(String url_server)throws RemoteException{
         synchronized (mutex2) {
-            urlServers.add(url_server);
-            notifyOperation("addServer:" + url_server);
-            if (urlServers.size() == 1) {
+            if(urlServers.contains(url_server)){
                 server_ready = false;
-                actual_url_server = url_server;
-                notifyOperation("SetActualServer:" + url_server);
-                //startServer(s);
+            }else {
+                urlServers.add(url_server);
+                notifyOperation("addServer:" + url_server);
+                if (urlServers.size() == 1) {
+                    server_ready = false;
+                    actual_url_server = url_server;
+                    notifyOperation("SetActualServer:" + url_server);
+                    //startServer(s);
+                }
             }
             return urlServers.size() - 1;
         }
