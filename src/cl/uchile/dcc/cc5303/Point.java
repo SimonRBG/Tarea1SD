@@ -43,9 +43,11 @@ public class Point implements Serializable {
 
     @Override
     public String toString() {
-        return new StringBuffer(this.x).append(" ")
+        String p = new StringBuffer().append(this.x).append(" ")
                 .append(this.y).append(" ")
                 .append(this.visible?1:0).toString();
+        //System.out.println("Point: "+p);
+        return p;
     }
 
 
@@ -55,6 +57,9 @@ public class Point implements Serializable {
             x = Integer.parseInt(sa[0]);
             y = Integer.parseInt(sa[1]);
             visible = (Integer.parseInt(sa[2]) == 1) ? true : false;
+            System.out.println("Point: "+x +","+y+","+visible+";");
+        }catch(NumberFormatException e){
+            System.out.println("not a number: "+ sa);
         }catch(Exception e){
             e.printStackTrace();
         }

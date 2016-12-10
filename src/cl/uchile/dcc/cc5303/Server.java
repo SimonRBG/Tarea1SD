@@ -11,7 +11,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.Stack;
 
 import com.sun.management.OperatingSystemMXBean;
@@ -63,28 +62,24 @@ public class Server extends Thread{
 
         try{
 
-            //loadState();
+            loadState();
 
             System.out.println("Objeto points publicado en: " + url_server);
-            int old_size[]= new int[points.getNumPlayers()];
 
             c.setServer_ready(true);
-            ArrayList<Integer> old_values = new ArrayList<>();
-            for (int i=0; i < points.getNumPlayers(); i++) {
-                old_values.add(0);
-            }
+
             com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
-            int save = 11;
+            //int save = 11;
             while (true) {
                 if (bean == null)
                     throw new NullPointerException("Unable to collect operating system metrics, jmx bean is null");
 
-                if(save >= 3){
+                //if(save >= 3){
                     saveState();
-                    save = 0;
-                }
-                save ++;
+                //    save = 0;
+                //}
+               // save ++;
                 try {
                     // We sleep to not surcharge the server's CPU charge
                     this.sleep(1000);
@@ -93,32 +88,6 @@ public class Server extends Thread{
                 }
                 charge_CPU = bean.getSystemCpuLoad();
                 System.out.println("CPU charge : " + charge_CPU);
-
-                // Verify that any client is still working and if not, make the quit for them
-                int o = 0;
-
-                // Case in which they all wait for begining other game
-                if (points.getWaitingResponse()) {
-                    while (o < points.getNumPlayers()) {
-                        if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0)
-                            points.setQuit(o);
-                        old_values.set(o, points.getUpdateValue(o));
-                        o++;
-                    }
-                }
-
-                // Case in which some of the loosers are waiting for the game to end
-                if (points.getSomeOneWaiiting()) {
-                    while (o < points.getNumPlayers()) {
-                        System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
-                        // If there is not more points for a given player and that player doesn't lost : he has quit the game
-                        if (old_size[o] == points.getList()[o].size() && !points.lost(o)){
-                            points.setQuit(o);
-                        }
-                        old_size[o] =points.getList()[o].size();
-                        o++;
-                    }
-                }
 
                 // First step : First reason to migrate : CPU_charge. Second reason : someOneQuit
                 if ((charge_CPU > 0.75 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
@@ -286,9 +255,13 @@ public class Server extends Thread{
                 String line = br.readLine();
                 if(line != null && !line.isEmpty()) {
                     System.out.println(line);
-                    Points ps = new Points(line);
+                    Points ps = new Points(line, w, h);
                     if (ps != null) {
                         points = ps;
+                        Naming.rebind(url_server, points);
+                    }
+                    else{
+                        System.out.println("null points: "+ line);
                     }
                 }
 
