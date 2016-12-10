@@ -169,6 +169,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         }
                     } catch (ConnectException e) {
                         // Free a space for new player
+                        System.out.println("check and quit");
                         this.setQuit(i);
                         // Don't draw the player that we can't connect
                         break;
@@ -258,7 +259,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 notifyOperation("all Lost");
             }
             // Id available & reinitilize the score
-            ids.push(new Integer(id));
+            if(!ids.contains(new Integer(id))) {
+                ids.push(new Integer(id));
+            }
 
             this.scores[id] = -1;
             this.ready[id] = true;
