@@ -7,12 +7,10 @@ package cl.uchile.dcc.cc5303;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Stack;
+import java.util.*;
 
 import static java.lang.Math.abs;
 
@@ -25,8 +23,12 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     public boolean looses[];
     public boolean allLost;
     public boolean ready[];
+    public boolean waitingEnd[];
     public int w, h;
+    public HashMap<Integer, Integer> updateValue;
+    public boolean waiting = false;
     boolean someOneQuit;
+    public boolean someOneWaiting = false;
 
     public Object mutex2 = new Object();
 
@@ -40,6 +42,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             this.ready = new boolean[n];
             this.allLost = false;
             this.numplayers = n;
+            this.updateValue = new HashMap<Integer, Integer>();
             list = new LinkedHashSet[n];
             for (int i = 0; i < n; i++) {
                 this.looses[i] = false;
@@ -112,6 +115,16 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             e.printStackTrace();
         }
     }
+    public void setWaitingResponse(boolean val) throws RemoteException {
+        synchronized (mutex2) {
+            this.waiting = val;
+        }
+    }
+
+    public boolean getWaitingResponse() throws RemoteException {
+        return waiting;
+    }
+
 
     public boolean lost(int id)throws RemoteException{
         synchronized (mutex2) {
@@ -143,7 +156,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 int py = p.getY();
                 boolean pv = p.getVisible();
                 // Check border
-                // Handle de score boards
+                // Handle the score boards
                 if (px > w || px < w / 4 || py > h || py < 0) {
                     return false;
                 }
@@ -154,7 +167,6 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
                             return false;
                         }
-                        it.remove();
                     } catch (ConnectException e) {
                         // Free a space for new player
                         this.setQuit(i);
@@ -265,6 +277,15 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             }
         }
     }
+
+    public void setSomeOneWaiting(boolean value) throws RemoteException{
+        this.someOneWaiting = value;
+    }
+
+    public boolean getSomeOneWaiiting() throws RemoteException{
+        return someOneWaiting;
+    }
+
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);
     }

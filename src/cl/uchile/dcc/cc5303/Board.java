@@ -109,7 +109,9 @@ public class Board extends Canvas{
                     if (p.getVisible())
                         buffer.fillOval(p.getX() - dHip / 2, p.getY() - dHip / 2, dHip, dHip);
                 }catch (RemoteException e){
-                    e.printStackTrace();
+                    //e.printStackTrace();
+                    // Don't draw the player that we can't connect
+                    break;
                 }
             }
         }
