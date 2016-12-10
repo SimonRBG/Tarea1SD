@@ -351,6 +351,12 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 }
                 sb.append(",");
             }
+            sb.append(";");
+
+            String suv = updateValue.toString();
+            sb.append(suv.substring(1,suv.length()-1));
+
+
             //sb.append(";");
 
             return sb.toString();
@@ -364,6 +370,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public Points(String s, int w, int h)  throws RemoteException {
+
 
         synchronized (mutex2) {
             this.w = w;
@@ -440,8 +447,12 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
 
 
-
-                String slist = sa[7].split(":")[1];
+                String slist;
+                try {
+                    slist = sa[7].split(":")[1];
+                }catch(ArrayIndexOutOfBoundsException e){
+                    slist = "";
+                }
                 String[] sslist = slist.split(",");
                 list = null;
                 this.list = new LinkedHashSet[numplayers];
@@ -468,6 +479,19 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         System.out.println("no list for player "+ i);
                     }
                 }
+
+                this.updateValue = new HashMap<Integer, Integer>();
+                String sUpdateValue = sa[8];
+                String[] ssuv = sUpdateValue.split(",");
+                for(int i = 0; i<ssuv.length; i++){
+                    String[] sssuv = ssuv[i].split("=");
+                    Integer k = new Integer(Integer.parseInt(sssuv[0].trim()));
+                    Integer v = new Integer(Integer.parseInt(sssuv[1].trim()));
+                    updateValue.put(k,v);
+                }
+
+                System.out.println("UV: "+ updateValue);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

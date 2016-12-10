@@ -274,7 +274,12 @@ public class Client extends Thread{
 				boolean allready = false;
 				while(!allready){
 					synchronized (comm.mutex) {
-						remotePoints.setUpdateValue(id);
+						try {
+							remotePoints.setUpdateValue(id);
+						} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
+							this.waitRecuperation();
+							continue kp;
+						}
                         checkMigration();
 						try {
 							allready = remotePoints.allPlayersReady();
