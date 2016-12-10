@@ -128,6 +128,16 @@ public class Client extends Thread{
 
 	}
 
+	public void leavePause() throws RemoteException {
+		if (keys[KeyEvent.VK_SPACE]) {
+			System.out.print("SPACE PUSHED");
+			synchronized (comm.mutex){
+				remotePoints.setPause();
+			}
+		}
+	}
+
+
     public void checkMigration()throws ConnectException ,java.rmi.UnmarshalException{
 		try {
 			String newUrl = comm.getActual_url_server();
@@ -313,6 +323,12 @@ public class Client extends Thread{
 							//System.out.println("DOWN");
 							player.moveDown();
 						}
+						if (keys[KeyEvent.VK_SPACE]) {
+							synchronized (comm.mutex) {
+								remotePoints.setPause();
+							}
+							System.out.print("SPACE PUSHED");
+						}
 						if (keys[KeyEvent.VK_Q]) {
 							// We quit the game
 							System.out.println("bye-bye");
@@ -372,7 +388,14 @@ public class Client extends Thread{
 			    	// Tablero
 					// Obtaining the scores for drawing
 					//waitMigrating();
-
+					while (remotePoints.gamePaused()) {
+						try {
+							this.sleep(100 / UPDATE_RATE);
+						} catch (InterruptedException ex) {
+							ex.printStackTrace();
+						}
+						leavePause();
+					}
 					synchronized (comm.mutex) {
                         checkMigration();
 						try {

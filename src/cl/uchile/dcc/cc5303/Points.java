@@ -28,6 +28,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     public HashMap<Integer, Integer> updateValue;
     public boolean waiting = false;
     boolean someOneQuit;
+    boolean gamePaused = false;
     public boolean someOneWaiting = false;
 
     public Object mutex2 = new Object();
@@ -285,6 +286,14 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     public boolean getSomeOneWaiiting() throws RemoteException{
         return someOneWaiting;
     }
+    public boolean gamePaused() throws RemoteException {
+        return gamePaused;
+    }
+
+    public void setPause() throws RemoteException {
+        this.gamePaused = !this.gamePaused;
+    }
+
 
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);

@@ -49,5 +49,9 @@ public interface IPoints extends Remote{
     public boolean getSomeOneWaiiting() throws RemoteException;
 
     public boolean someOneQuit() throws  RemoteException;
+
+    public boolean gamePaused() throws RemoteException;
+
+    public void setPause() throws RemoteException;
 }
 
