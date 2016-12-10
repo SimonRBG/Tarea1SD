@@ -5,7 +5,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.net.MalformedURLException;
-import java.rmi.*;
+import java.rmi.ConnectException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.EmptyStackException;
 import java.util.Random;
 
@@ -213,9 +216,9 @@ public class Client extends Thread{
 
 				boolean allready = false;
 				while(!allready){
-					remotePoints.setUpdateValue(id);
+
 					synchronized (comm.mutex) {
-						checkMigration();
+                        checkMigration();
 						try {
 							allready = remotePoints.allPlayersReady();
 						} catch (ConnectException e){
@@ -224,7 +227,6 @@ public class Client extends Thread{
 					}
 					continue;
 			    }
-				remotePoints.setWaitingResponse(false);
 				System.out.println("All Players Ready!");
 				tablero.wait = false;
 				// Main loop
@@ -342,17 +344,11 @@ public class Client extends Thread{
 							}
 						}
 						if(allLost){
-							synchronized (comm.mutex) {
-								remotePoints.setSomeOneWaiting(false);
-							}
 							System.out.println("allLost");
 							break;	//break while true
 						}
 						else{
-							synchronized (comm.mutex) {
-								remotePoints.setSomeOneWaiting(true);
-							}
-							System.out.println("someone stillAlive");
+							System.out.println("stillAlive"+id);
 						}
 					}
 
@@ -377,14 +373,12 @@ public class Client extends Thread{
 				tablero.press=true;
 				tablero.repaint();//paint the points in the board
 
-                while(true) {//waiting for players to decide
-					// Verify that it doesn't die
-					remotePoints.setUpdateValue(id);
-					remotePoints.setWaitingResponse(true);
+                while(true) {//wainting for players to decide
 					if (keys[KeyEvent.VK_Y]) {
 						System.out.println("Waiting for other players to answer");
 						keepPlaying = true;
 						//waitMigrating();
+
 						synchronized (comm.mutex) {
                             checkMigration();
 							try {
