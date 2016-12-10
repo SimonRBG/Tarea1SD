@@ -1,9 +1,12 @@
 package cl.uchile.dcc.cc5303;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class Point extends UnicastRemoteObject implements IPoint {
+public class Point implements Serializable {
     public int x,y;
     public boolean visible;
 
@@ -31,6 +34,53 @@ public class Point extends UnicastRemoteObject implements IPoint {
 
     public boolean getVisible() throws RemoteException {
         return visible;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException{
+        //perform the default serialization for all non-transient, non-static fields
+        out.defaultWriteObject();
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuffer(this.x).append(" ")
+                .append(this.y).append(" ")
+                .append(this.visible?1:0).toString();
+    }
+
+
+    public Point(String s){
+        String[] sa = s.split(" ");
+        try {
+            x = Integer.parseInt(sa[0]);
+            y = Integer.parseInt(sa[1]);
+            visible = (Integer.parseInt(sa[2]) == 1) ? true : false;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public int compareTo(Point p){
+        if (this == p){
+            return 0;
+        }
+        else if(this.x == p.x) {
+            if (this.y == p.y) {
+                if (this.visible) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            } else if (this.y < p.y) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }else if(this.x<this.y){
+            return -1;
+        }else {
+            return 1;
+        }
     }
 }
 

@@ -8,17 +8,21 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Stack;
 
 import static java.lang.Math.abs;
 
-public class Points extends UnicastRemoteObject  implements IPoints {
+public class Points extends UnicastRemoteObject  implements IPoints, Serializable {
 
     public int numplayers;
     public Stack ids = new Stack();
-    public LinkedHashSet<IPoint> list[];// We have to keep in mind the order
+    public LinkedHashSet<Point> list[];// We have to keep in mind the order
     public int scores[];
     public boolean looses[];
     public boolean allLost;
@@ -48,13 +52,13 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                 this.looses[i] = false;
                 this.ready[i] = false;
                 this.scores[i] = -1;
-                list[i] = new LinkedHashSet<IPoint>();
+                list[i] = new LinkedHashSet<Point>();
                 ids.push(n - 1 - i);
             }
         }
     }
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<IPoint>[] l, Stack ids, int numplayers) throws RemoteException{
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers) throws RemoteException{
         synchronized (mutex2) {
             this.allLost = allLost;
             this.list = l;
@@ -72,7 +76,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
         }
 
     }
-
 
     public void setUpdateValue(int ind) throws RemoteException {
         if (!updateValue.containsKey(ind))
@@ -132,7 +135,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             return true;
     }
 
-    private boolean check(IPoint p) throws RemoteException {
+    private boolean check(Point p) throws RemoteException {
             for (int i = 0; i < this.numplayers; i++) {
                 Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
                 int px = p.getX();
@@ -162,7 +165,7 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             return true;
     }
 
-    public LinkedHashSet<IPoint>[] getList() throws RemoteException {
+    public LinkedHashSet<Point>[] getList() throws RemoteException {
         synchronized (mutex2) {
             return list.clone();
         }
@@ -280,4 +283,134 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);
     }
+
+
+    public int compareTo(Points p ) {
+        return this.toString().compareTo(p.toString());
+    }
+
+    @Override
+    public String toString() {
+        synchronized (mutex2) {
+            StringBuffer sb = new StringBuffer(" SomeOneQuit: ").append(this.someOneQuit ? 1 : 0).append(";");
+            sb.append(" NumPlayers: ").append(numplayers).append(";");
+
+            sb.append(" Scores: ");
+
+            for (int i = 0; i < numplayers; i++) {
+                sb.append(this.scores[i]);
+                sb.append(" ");
+            }
+            sb.append(";");
+
+            sb.append(" Looses: ");
+            for (int i = 0; i < numplayers; i++) {
+                sb.append(this.looses[i] ? 1 : 0);
+                sb.append(" ");
+            }
+            sb.append(";");
+
+            sb.append(" Ready: ");
+            sb.append("");
+            for (int i = 0; i < numplayers; i++) {
+                sb.append(this.ready[i] ? 1 : 0);
+                sb.append(" ");
+            }
+            sb.append(";");
+
+            sb.append(" AllLost: ").append(allLost ? 1 : 0).append(";");
+
+
+            sb.append(" Ids: ");
+            for (int i = 0; i < ids.size(); i++) {
+                sb.append(ids.get(i)).append(" ");
+            }
+            sb.append(";");
+
+            sb.append(" List: ");
+            for (int i = 0; i < numplayers; i++) {
+                Iterator it = list[i].iterator();
+                while (it.hasNext()) {
+                    Point p = (Point) it.next();
+                    sb.append(" Point: ").append(p.toString());
+                }
+                sb.append(",");
+            }
+            //sb.append(";");
+
+            return sb.toString();
+        }
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException{
+        //perform the default serialization for all non-transient, non-static fields
+        out.defaultWriteObject();
+
+    }
+
+    public Points(String s) throws RemoteException {
+        synchronized (mutex2) {
+            String[] sa = s.split(";");
+
+            //SomeOneQuit:0; NumPlayers:2; Scores:[-1 -1 ]; Looses:[0 0 ]; Ready:[0 0 ]; AllLost:0; Ids:[1, 0]; List:[][];
+            try {
+                someOneQuit = (Integer.parseInt(sa[0].split(":")[1]) == 0) ? false : true;
+                numplayers = Integer.parseInt(sa[1].split(":")[1]);
+
+                String sscores = sa[2].split(":")[1];
+                String[] ssscores = sscores.split(" ");
+                System.out.println(sscores);
+                scores = new int[numplayers];
+                for (int i = 0; i < numplayers; i++) {
+                    System.out.println(ssscores[i]);
+                    scores[i] = Integer.parseInt(ssscores[i]);
+
+                }
+
+                String slooses = sa[3].split(":")[1];
+                String[] sslooses = slooses.split(" ");
+                looses = new boolean[numplayers];
+                for (int i = 0; i < numplayers; i++) {
+                    looses[i] = (Integer.parseInt(sslooses[i]) == 0) ? false : true;
+                }
+
+
+                String sready = sa[4].split(":")[1];
+                String[] ssready = sready.split(" ");
+                ready = new boolean[numplayers];
+                for (int i = 0; i < numplayers; i++) {
+                    ready[i] = (Integer.parseInt(ssready[i]) == 0) ? false : true;
+                }
+
+                allLost = (Integer.parseInt(sa[5].split(":")[1]) == 0) ? false : true;
+
+
+                String sids = sa[6].split(":")[1];
+                String[] ssids = sids.split(" ");
+                System.out.println(sids);
+                ids = new Stack();
+                for (int i = ssids.length; i > 0; i--) {
+                    ids.push(ssids[i]);
+                }
+
+
+                String slist = sa[7].split(":")[1];
+                String[] sslist = slist.split(", ");
+                list = new LinkedHashSet[numplayers];
+                for (int i = 0; i < numplayers; i++) {
+                    list[i] = new LinkedHashSet<Point>();
+                    String[] ssslist = sslist[i].split("Point ");
+                    for (int j = 0; j < sslist.length; j++) {
+                        Point p = new Point(ssslist[j]);
+                        list[i].add(p);
+                    }
+                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

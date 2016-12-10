@@ -4,6 +4,7 @@ package cl.uchile.dcc.cc5303;
  * Created by pecesito on 12-10-16.
  */
 
+import java.io.*;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -62,6 +63,8 @@ public class Server extends Thread{
 
         try{
 
+            //loadState();
+
             System.out.println("Objeto points publicado en: " + url_server);
             int old_size[]= new int[points.getNumPlayers()];
 
@@ -71,10 +74,17 @@ public class Server extends Thread{
                 old_values.add(0);
             }
             com.sun.management.OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
+            int save = 11;
             while (true) {
                 if (bean == null)
                     throw new NullPointerException("Unable to collect operating system metrics, jmx bean is null");
 
+                if(save >= 3){
+                    saveState();
+                    save = 0;
+                }
+                save ++;
                 try {
                     // We sleep to not surcharge the server's CPU charge
                     this.sleep(1000);
@@ -244,4 +254,52 @@ public class Server extends Thread{
     public static int registerWithCoordinator(IComm c, String s) throws RemoteException{
         return c.addServer(s);
     }
+
+    public void saveState() {
+        synchronized (c.mutex) {
+            try {
+
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream("filename.txt"), "utf-8"))) {
+                    writer.write(points.toString());
+                    System.out.println("Writing");
+                }
+
+
+            /*FileOutputStream fout = new FileOutputStream("filename.txt", false);
+            ObjectOutputStream oos = new ObjectOutputStream(fout);
+            oos.writeObject((Points)points);
+            oos.close();
+            System.out.println("Writing...");
+            */
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void loadState() {
+        synchronized (c.mutex) {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("filename.txt"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+                if(line != null && !line.isEmpty()) {
+                    System.out.println(line);
+                    Points ps = new Points(line);
+                    if (ps != null) {
+                        points = ps;
+                    }
+                }
+
+                br.close();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

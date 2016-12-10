@@ -12,7 +12,7 @@ public class Board extends Canvas{
 
     // Jugadores y elementos del juego acá
     public Player p1, p2;
-    public LinkedHashSet<IPoint> points[];
+    public LinkedHashSet<Point> points[];
     public int scores[];
     public int numplayers;
     public boolean wait, press,bye;
@@ -77,7 +77,7 @@ public class Board extends Canvas{
 
     }
 
-    private void draw(LinkedHashSet<IPoint>[] points, int scores[], int numplayers){
+    private void draw(LinkedHashSet<Point>[] points, int scores[], int numplayers){
 
         drawScores();
 
@@ -87,10 +87,10 @@ public class Board extends Canvas{
 
         for(int j = 0; j < numplayers; j++) {
             buffer.setColor(colors[j]);
-            LinkedHashSet<IPoint> l = points[j];
+            LinkedHashSet<Point> l = points[j];
             Iterator itr = l.iterator();
             while (itr.hasNext()) {
-                IPoint p = (IPoint) itr.next();
+                Point p = (Point) itr.next();
                 try{
                     if (p.getVisible())
                         buffer.fillOval(p.getX() - dHip / 2, p.getY() - dHip / 2, dHip, dHip);
