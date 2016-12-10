@@ -1,6 +1,7 @@
 package cl.uchile.dcc.cc5303;
 
 import java.awt.*;
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
@@ -94,7 +95,8 @@ public class Board extends Canvas{
                     if (p.getVisible())
                         buffer.fillOval(p.getX() - dHip / 2, p.getY() - dHip / 2, dHip, dHip);
                 }catch (RemoteException e){
-                    e.printStackTrace();
+                    // Don't draw the player that we can't connect
+                    break;
                 }
             }
         }
