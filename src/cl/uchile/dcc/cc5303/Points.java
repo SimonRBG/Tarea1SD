@@ -169,7 +169,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         }
                     } catch (ConnectException e) {
                         // Free a space for new player
-                        System.out.println("check and quit");
+                        //System.out.println("check and quit");
                         this.setQuit(i);
                         // Don't draw the player that we can't connect
                         break;

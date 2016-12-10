@@ -328,7 +328,7 @@ public class Client extends Thread{
 							synchronized (comm.mutex){
 								checkMigration();
 								try {
-									System.out.println("client press Q 1");
+									//System.out.println("client press Q 1");
 									remotePoints.setQuit(id);
 								} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 									this.waitRecuperation();
@@ -522,7 +522,7 @@ public class Client extends Thread{
 							checkMigration();
 							try {
 								//ready=true;
-								System.out.println("Client press q 2");
+								//System.out.println("Client press q 2");
 								remotePoints.setQuit(id);
 							}
 							catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){

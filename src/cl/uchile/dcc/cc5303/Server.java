@@ -102,7 +102,7 @@ public class Server extends Thread{
                 if (points.getWaitingResponse()) {
                     while (o < points.getNumPlayers()) {
                         if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0) {
-                            System.out.println("waiting response and quit"+ o);
+                            //System.out.println("waiting response and quit"+ o);
                             points.setQuit(o);
                         }
                         old_values.set(o, points.getUpdateValue(o));
@@ -116,7 +116,7 @@ public class Server extends Thread{
                         System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
                         // If there is not more points for a given player and that player doesn't lost : he has quit the game
                         if (old_size[o] == points.getList()[o].size() && !points.lost(o)){
-                            System.out.println("waiting response and quit 2222");
+                            //System.out.println("waiting response and quit 2222");
                             points.setQuit(o);
                         }
                         old_size[o] =points.getList()[o].size();
