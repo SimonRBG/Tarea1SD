@@ -81,15 +81,19 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public void setUpdateValue(int ind) throws RemoteException {
-        if (!updateValue.containsKey(ind))
-            this.updateValue.put(ind,0);
-        updateValue.put(ind, updateValue.get(ind)+1);
+        synchronized (mutex2) {
+            if (!updateValue.containsKey(ind))
+                this.updateValue.put(ind, 0);
+            updateValue.put(ind, updateValue.get(ind) + 1);
+        }
     }
 
     public int getUpdateValue(int ind) throws RemoteException {
-        if (!updateValue.containsKey(ind))
-            this.updateValue.put(ind,0);
-        return  updateValue.get(ind);
+        synchronized (mutex2) {
+            if (!updateValue.containsKey(ind))
+                this.updateValue.put(ind, 0);
+            return updateValue.get(ind);
+        }
     }
 
     public void addPoint(Point po, int i) throws RemoteException{
@@ -129,7 +133,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public boolean getWaitingResponse() throws RemoteException {
-        return waiting;
+        synchronized (mutex2) {
+            return waiting;
+        }
     }
 
 
@@ -148,11 +154,13 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     private boolean checkAllPlayers(){
+        synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
                 if (!this.looses[i])
                     return false;
             }
             return true;
+        }
     }
 
     private boolean check(Point p) throws RemoteException {
@@ -194,11 +202,13 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     private void notify_score(int id) {
-        // Update the score of all the others snakes alive
+        synchronized (mutex2) {
+            // Update the score of all the others snakes alive
             for (int i = 0; i < numplayers; i++) {
                 if (i != id && !this.looses[i])
                     scores[i]++;
             }
+        }
     }
 
     public int getScore(int id) throws RemoteException {
@@ -289,11 +299,15 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public void setSomeOneWaiting(boolean value) throws RemoteException{
-        this.someOneWaiting = value;
+        synchronized (mutex2) {
+            this.someOneWaiting = value;
+        }
     }
 
     public boolean getSomeOneWaiiting() throws RemoteException{
-        return someOneWaiting;
+        synchronized (mutex2) {
+            return someOneWaiting;
+        }
     }
 
     private void notifyOperation(String s){

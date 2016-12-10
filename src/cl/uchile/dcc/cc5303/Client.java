@@ -533,7 +533,7 @@ public class Client extends Thread{
 						break;
 					}
 					try {
-						this.sleep(1000);
+						this.sleep(1000/UPDATE_RATE);
 					} catch (InterruptedException ex) {
 						ex.printStackTrace();
 					}
