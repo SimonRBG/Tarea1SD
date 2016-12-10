@@ -89,7 +89,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         return  updateValue.get(ind);
     }
 
-    public void addPoint(IPoint po, int i) throws RemoteException{
+    public void addPoint(Point po, int i) throws RemoteException{
 
         if (po==null)
             return;
@@ -149,7 +149,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 //Check other points
                 while (it.hasNext()) {
                     try {
-                        IPoint p2 = (IPoint) it.next();
+                        Point p2 = (Point)it.next();
                         if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
                             return false;
                         }
