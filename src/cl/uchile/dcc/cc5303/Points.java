@@ -70,6 +70,18 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
     }
 
+    public void setUpdateValue(int ind) throws RemoteException {
+        if (!updateValue.containsKey(ind))
+            this.updateValue.put(ind,0);
+        updateValue.put(ind, updateValue.get(ind)+1);
+    }
+
+    public int getUpdateValue(int ind) throws RemoteException {
+        if (!updateValue.containsKey(ind))
+            this.updateValue.put(ind,0);
+        return  updateValue.get(ind);
+    }
+
     public void addPoint(Point po, int i) throws RemoteException{
         try {
             if (po == null)
@@ -137,11 +149,17 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 }
                 //Check other points
                 while (it.hasNext()) {
-                    Point p2 = (Point) it.next();
-                    if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
-                        System.out.println(p);
-                        System.out.println(p2);
-                        return false;
+                    try {
+                        Point p2 = (Point)it.next();
+                        if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
+                            return false;
+                        }
+                        it.remove();
+                    } catch (ConnectException e) {
+                        // Free a space for new player
+                        this.setQuit(i);
+                        // Don't draw the player that we can't connect
+                        break;
                     }
                     it.remove();
                 }
