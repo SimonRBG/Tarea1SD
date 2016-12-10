@@ -36,6 +36,8 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         synchronized (mutex2) {
             this.w = w;
             this.h = h;
+            this.waiting = false;
+            this.someOneWaiting = false;
             this.someOneQuit = false;
             this.scores = new int[n];
             this.looses = new boolean[n];
@@ -54,7 +56,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers) throws RemoteException{
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue ) throws RemoteException{
         synchronized (mutex2) {
             this.allLost = allLost;
             this.list = l;
@@ -63,6 +65,11 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             this.ready = ready;
             this.ids = ids;
             this.numplayers = numplayers;
+            this.someOneQuit = someOneQuit;
+            this.updateValue = updateValue;
+            this.waiting = waiting;
+            this.someOneWaiting = someOneWaiting;
+
         }
     }
 
@@ -360,7 +367,20 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             sb.append(suv.substring(1,suv.length()-1));
 
 
+            sb.append(";");
+            String swaiting = waiting?"1":"0";
+            sb.append("Waiting:").append(swaiting);
+
+            sb.append(";");
+            String ssomeOneWaiting = someOneWaiting?"1":"0";
+            sb.append("SomeOneWaiting:").append(ssomeOneWaiting);
+
+
+
             //sb.append(";");
+
+
+
 
             return sb.toString();
         }
@@ -494,6 +514,12 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 }
 
                 System.out.println("UV: "+ updateValue);
+
+                waiting = (Integer.parseInt(sa[9].split(":")[1]) == 0) ? false : true;
+                System.out.println("waiting: "+waiting);
+
+                someOneWaiting = (Integer.parseInt(sa[10].split(":")[1]) == 0) ? false : true;
+                System.out.println("someoneWaiting:"+someOneWaiting);
 
             } catch (Exception e) {
                 e.printStackTrace();

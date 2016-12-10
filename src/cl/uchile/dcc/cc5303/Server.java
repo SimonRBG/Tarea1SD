@@ -140,7 +140,7 @@ public class Server extends Thread{
                             String url = c.getActual_url_server();
                             System.out.println(url);
                             IPoints p = (IPoints) Naming.lookup(url);
-                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers);
+                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers, mypoints.someOneQuit, mypoints.waiting, mypoints.someOneWaiting, mypoints.updateValue);
                             Naming.unbind(url_server);
                             points = new Points(num_players, w, h);
                             Naming.rebind(url_server, points);
