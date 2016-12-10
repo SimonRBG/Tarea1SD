@@ -63,6 +63,7 @@ public class Server extends Thread{
         try{
 
             System.out.println("Objeto points publicado en: " + url_server);
+            int old_size[]= new int[points.getNumPlayers()];
 
             c.setServer_ready(true);
             ArrayList<Integer> old_values = new ArrayList<>();
@@ -86,8 +87,8 @@ public class Server extends Thread{
                 // Verify that any client is still working and if not, make the quit for them
                 int o = 0;
 
+                // Case in which they all wait for begining other game
                 if (points.getWaitingResponse()) {
-
                     while (o < points.getNumPlayers()) {
                         if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0)
                             points.setQuit(o);
@@ -95,6 +96,20 @@ public class Server extends Thread{
                         o++;
                     }
                 }
+
+                // Case in which some of the loosers are waiting for the game to end
+                if (points.getSomeOneWaiiting()) {
+                    while (o < points.getNumPlayers()) {
+                        System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
+                        // If there is not more points for a given player and that player doesn't lost : he has quit the game
+                        if (old_size[o] == points.getList()[o].size() && !points.lost(o)){
+                            points.setQuit(o);
+                        }
+                        old_size[o] =points.getList()[o].size();
+                        o++;
+                    }
+                }
+
                 // First step : First reason to migrate : CPU_charge. Second reason : someOneQuit
                 if ((charge_CPU > 0.75 && ! c.lastServer()) || (points.someOneQuit() && ! c.lastServer())){
                     // then migrate to another server

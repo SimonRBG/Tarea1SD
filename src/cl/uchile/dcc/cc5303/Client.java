@@ -342,11 +342,17 @@ public class Client extends Thread{
 							}
 						}
 						if(allLost){
+							synchronized (comm.mutex) {
+								remotePoints.setSomeOneWaiting(false);
+							}
 							System.out.println("allLost");
 							break;	//break while true
 						}
 						else{
-							System.out.println("stillAlive"+id);
+							synchronized (comm.mutex) {
+								remotePoints.setSomeOneWaiting(true);
+							}
+							System.out.println("someone stillAlive");
 						}
 					}
 

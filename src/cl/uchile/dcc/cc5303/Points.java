@@ -23,10 +23,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
     public boolean looses[];
     public boolean allLost;
     public boolean ready[];
+    public boolean waitingEnd[];
     public int w, h;
     public HashMap<Integer, Integer> updateValue;
     public boolean waiting = false;
     boolean someOneQuit;
+    public boolean someOneWaiting = false;
 
     public Object mutex2 = new Object();
 
@@ -101,7 +103,6 @@ public class Points extends UnicastRemoteObject  implements IPoints {
                 if (checkAllPlayers()) {
                     this.allLost = true;
                     notifyOperation("all Lost");
-                    //TODO borrar todo y empezar de nuevo
                 }
             }
         }
@@ -133,13 +134,12 @@ public class Points extends UnicastRemoteObject  implements IPoints {
 
     private boolean check(IPoint p) throws RemoteException {
             for (int i = 0; i < this.numplayers; i++) {
-                // TODO : Change the evaluation criteria
                 Iterator it = ((LinkedHashSet) list[i].clone()).iterator();
                 int px = p.getX();
                 int py = p.getY();
                 boolean pv = p.getVisible();
                 // Check border
-                // Handle de score boards
+                // Handle the score boards
                 if (px > w || px < w / 4 || py > h || py < 0) {
                     return false;
                 }
@@ -268,6 +268,15 @@ public class Points extends UnicastRemoteObject  implements IPoints {
             }
         }
     }
+
+    public void setSomeOneWaiting(boolean value) throws RemoteException{
+        this.someOneWaiting = value;
+    }
+
+    public boolean getSomeOneWaiiting() throws RemoteException{
+        return someOneWaiting;
+    }
+
     private void notifyOperation(String s){
         System.out.println("Operation: "+s);
     }
