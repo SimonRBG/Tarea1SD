@@ -101,8 +101,10 @@ public class Server extends Thread{
                 // Case in which they all wait for begining other game
                 if (points.getWaitingResponse()) {
                     while (o < points.getNumPlayers()) {
-                        if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0)
+                        if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0) {
+                            //System.out.println("waiting response and quit"+ o);
                             points.setQuit(o);
+                        }
                         old_values.set(o, points.getUpdateValue(o));
                         o++;
                     }
@@ -114,6 +116,7 @@ public class Server extends Thread{
                         System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
                         // If there is not more points for a given player and that player doesn't lost : he has quit the game
                         if (old_size[o] == points.getList()[o].size() && !points.lost(o)){
+                            //System.out.println("waiting response and quit 2222");
                             points.setQuit(o);
                         }
                         old_size[o] =points.getList()[o].size();
@@ -137,7 +140,7 @@ public class Server extends Thread{
                             String url = c.getActual_url_server();
                             System.out.println(url);
                             IPoints p = (IPoints) Naming.lookup(url);
-                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers);
+                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers, mypoints.someOneQuit, mypoints.waiting, mypoints.someOneWaiting, mypoints.updateValue);
                             Naming.unbind(url_server);
                             points = new Points(num_players, w, h);
                             Naming.rebind(url_server, points);

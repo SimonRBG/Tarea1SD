@@ -37,6 +37,8 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         synchronized (mutex2) {
             this.w = w;
             this.h = h;
+            this.waiting = false;
+            this.someOneWaiting = false;
             this.someOneQuit = false;
             this.scores = new int[n];
             this.looses = new boolean[n];
@@ -55,7 +57,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers) throws RemoteException{
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue ) throws RemoteException{
         synchronized (mutex2) {
             this.allLost = allLost;
             this.list = l;
@@ -64,6 +66,11 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             this.ready = ready;
             this.ids = ids;
             this.numplayers = numplayers;
+            this.someOneQuit = someOneQuit;
+            this.updateValue = updateValue;
+            this.waiting = waiting;
+            this.someOneWaiting = someOneWaiting;
+
         }
     }
 
@@ -75,15 +82,19 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public void setUpdateValue(int ind) throws RemoteException {
-        if (!updateValue.containsKey(ind))
-            this.updateValue.put(ind,0);
-        updateValue.put(ind, updateValue.get(ind)+1);
+        synchronized (mutex2) {
+            if (!updateValue.containsKey(ind))
+                this.updateValue.put(ind, 0);
+            updateValue.put(ind, updateValue.get(ind) + 1);
+        }
     }
 
     public int getUpdateValue(int ind) throws RemoteException {
-        if (!updateValue.containsKey(ind))
-            this.updateValue.put(ind,0);
-        return  updateValue.get(ind);
+        synchronized (mutex2) {
+            if (!updateValue.containsKey(ind))
+                this.updateValue.put(ind, 0);
+            return updateValue.get(ind);
+        }
     }
 
     public void addPoint(Point po, int i) throws RemoteException{
@@ -123,7 +134,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public boolean getWaitingResponse() throws RemoteException {
-        return waiting;
+        synchronized (mutex2) {
+            return waiting;
+        }
     }
 
 
@@ -142,11 +155,13 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     private boolean checkAllPlayers(){
+        synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
                 if (!this.looses[i])
                     return false;
             }
             return true;
+        }
     }
 
     private boolean check(Point p) throws RemoteException {
@@ -170,6 +185,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         }
                     } catch (ConnectException e) {
                         // Free a space for new player
+                        //System.out.println("check and quit");
                         this.setQuit(i);
                         // Don't draw the player that we can't connect
                         break;
@@ -187,11 +203,13 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     private void notify_score(int id) {
-        // Update the score of all the others snakes alive
+        synchronized (mutex2) {
+            // Update the score of all the others snakes alive
             for (int i = 0; i < numplayers; i++) {
                 if (i != id && !this.looses[i])
                     scores[i]++;
             }
+        }
     }
 
     public int getScore(int id) throws RemoteException {
@@ -259,7 +277,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 notifyOperation("all Lost");
             }
             // Id available & reinitilize the score
-            ids.push(new Integer(id));
+            if(!ids.contains(new Integer(id))) {
+                ids.push(new Integer(id));
+            }
 
             this.scores[id] = -1;
             this.ready[id] = true;
@@ -280,11 +300,15 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     }
 
     public void setSomeOneWaiting(boolean value) throws RemoteException{
-        this.someOneWaiting = value;
+        synchronized (mutex2) {
+            this.someOneWaiting = value;
+        }
     }
 
     public boolean getSomeOneWaiiting() throws RemoteException{
-        return someOneWaiting;
+        synchronized (mutex2) {
+            return someOneWaiting;
+        }
     }
     public boolean gamePaused() throws RemoteException {
         return gamePaused;
@@ -366,7 +390,20 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             sb.append(suv.substring(1,suv.length()-1));
 
 
+            sb.append(";");
+            String swaiting = waiting?"1":"0";
+            sb.append("Waiting:").append(swaiting);
+
+            sb.append(";");
+            String ssomeOneWaiting = someOneWaiting?"1":"0";
+            sb.append("SomeOneWaiting:").append(ssomeOneWaiting);
+
+
+
             //sb.append(";");
+
+
+
 
             return sb.toString();
         }
@@ -500,6 +537,12 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 }
 
                 System.out.println("UV: "+ updateValue);
+
+                waiting = (Integer.parseInt(sa[9].split(":")[1]) == 0) ? false : true;
+                System.out.println("waiting: "+waiting);
+
+                someOneWaiting = (Integer.parseInt(sa[10].split(":")[1]) == 0) ? false : true;
+                System.out.println("someoneWaiting:"+someOneWaiting);
 
             } catch (Exception e) {
                 e.printStackTrace();

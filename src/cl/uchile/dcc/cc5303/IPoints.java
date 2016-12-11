@@ -5,12 +5,13 @@ package cl.uchile.dcc.cc5303;
  */
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Stack;
 
 public interface IPoints extends Remote{
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers)throws RemoteException;
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue ) throws RemoteException;
 
     public Points getPoints() throws RemoteException;
 
