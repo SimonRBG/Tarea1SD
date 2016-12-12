@@ -14,7 +14,7 @@ public class Board extends Canvas{
     public LinkedHashSet<Point> points[];
     public int scores[];
     public int numplayers;
-    public boolean wait, press,bye;
+    public boolean wait, press, bye, pause;
     private Color[] colors;
 
     public int id = 0;
@@ -33,6 +33,7 @@ public class Board extends Canvas{
         this.wait = true;
         this.press = false;
         this.bye = false;
+        this.pause = false;
         colors = new Color[5];
         colors[0] = Color.red;
         colors[1] = Color.blue;
@@ -76,6 +77,9 @@ public class Board extends Canvas{
             }else
             if(this.bye){
                 drawString("Bye Bye!!");
+            }else
+            if (this.pause) {
+                drawString("PAUSE (SPACE to continue)");
             }
         }else{
             String s = "The server failed, waiting for it to recuperate";

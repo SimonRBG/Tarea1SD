@@ -129,12 +129,15 @@ public class Client extends Thread{
 	}
 
 	public void leavePause() throws RemoteException {
+		tablero.paint(tablero.getGraphics());
+		tablero.p = (tablero.p+1)%3;
+		tablero.pause = remotePoints.gamePaused();
 		if (keys[KeyEvent.VK_SPACE]) {
-			System.out.print("SPACE PUSHED");
-			synchronized (comm.mutex){
-				remotePoints.setPause();
-			}
+			remotePoints.setPause();
+			tablero.pause = remotePoints.gamePaused();
 		}
+		tablero.pause = remotePoints.gamePaused();
+		tablero.paint(tablero.getGraphics());
 	}
 
 
@@ -335,6 +338,7 @@ public class Client extends Thread{
 						if (keys[KeyEvent.VK_SPACE]) {
 							synchronized (comm.mutex) {
 								remotePoints.setPause();
+								tablero.pause = remotePoints.gamePaused();
 							}
 							System.out.print("SPACE PUSHED");
 						}
@@ -398,13 +402,19 @@ public class Client extends Thread{
 			    	// Tablero
 					// Obtaining the scores for drawing
 					//waitMigrating();
-					while (remotePoints.gamePaused()) {
+					synchronized (comm.mutex){
 						try {
-							this.sleep(100 / UPDATE_RATE);
-						} catch (InterruptedException ex) {
-							ex.printStackTrace();
+							while (remotePoints.gamePaused()) {
+								this.sleep(100 / UPDATE_RATE);
+								leavePause();
+							}
+						} catch (InterruptedException e){
+							e.printStackTrace();
 						}
-						leavePause();
+						catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
+							this.waitRecuperation();
+							continue kp;
+						}
 					}
 					synchronized (comm.mutex) {
                         checkMigration();
