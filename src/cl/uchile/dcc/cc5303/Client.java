@@ -177,8 +177,10 @@ public class Client extends Thread{
 				player.ended = remotePoints.lost(id);
 				System.out.println("ended:"+player.ended);
 				try {
-					player.head = (Point)points[id].toArray()[points[id].size()-1];
-					System.out.println("head: "+ player.head);
+					if(player.head==null) {
+						player.head = (Point) points[id].toArray()[points[id].size() - 1];
+						System.out.println("head: " + player.head);
+					}
 
 				}catch(Exception e){
 					System.out.println("no points");
