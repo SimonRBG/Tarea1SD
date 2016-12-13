@@ -131,10 +131,8 @@ public class Client extends Thread{
 	public void leavePause() throws RemoteException {
 		tablero.paint(tablero.getGraphics());
 		tablero.p = (tablero.p+1)%3;
-		tablero.pause = remotePoints.gamePaused();
 		if (keys[KeyEvent.VK_SPACE]) {
-			remotePoints.setPause();
-			tablero.pause = remotePoints.gamePaused();
+			tablero.pause = remotePoints.setPause();
 		}
 		tablero.pause = remotePoints.gamePaused();
 		tablero.paint(tablero.getGraphics());
@@ -336,9 +334,16 @@ public class Client extends Thread{
 							player.moveDown();
 						}
 						if (keys[KeyEvent.VK_SPACE]) {
+
 							synchronized (comm.mutex) {
-								remotePoints.setPause();
-								tablero.pause = remotePoints.gamePaused();
+								checkMigration();
+								try {
+									tablero.pause = remotePoints.setPause();
+								//tablero.pause = remotePoints.gamePaused();
+								} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
+									this.waitRecuperation();
+									continue kp;
+								}
 							}
 							System.out.print("SPACE PUSHED");
 						}
@@ -389,7 +394,8 @@ public class Client extends Thread{
 							synchronized (comm.mutex) {
                                 checkMigration();
 								try {
-									remotePoints.addPoint(new_point, id);
+									boolean aux = remotePoints.addPoint(new_point, id);
+									System.out.println(aux);
 								} catch (ConnectException | java.rmi.UnmarshalException | ConnectIOException e){
 									this.waitRecuperation();
 									continue kp;
@@ -403,11 +409,13 @@ public class Client extends Thread{
 					// Obtaining the scores for drawing
 					//waitMigrating();
 					synchronized (comm.mutex){
+						checkMigration();
 						try {
 							while (remotePoints.gamePaused()) {
-								this.sleep(100 / UPDATE_RATE);
+								this.sleep(1000 / UPDATE_RATE);
 								leavePause();
 							}
+							tablero.pause = false;
 						} catch (InterruptedException e){
 							e.printStackTrace();
 						}
@@ -496,7 +504,7 @@ public class Client extends Thread{
 					}
 
 					try {
-					    this.sleep(100 / UPDATE_RATE);
+					    this.sleep(1000 / UPDATE_RATE);
 					} catch (InterruptedException ex) {
                         ex.printStackTrace();
 					}

@@ -109,14 +109,15 @@ public class Board extends Canvas{
             Iterator itr = l.iterator();
             while (itr.hasNext()) {
                 Point p = (Point) itr.next();
-                try{
+                //try{
                     if (p.getVisible())
                         buffer.fillOval(p.getX() - dHip / 2, p.getY() - dHip / 2, dHip, dHip);
-                }catch (RemoteException e){
-                    //e.printStackTrace();
+                /*}catch (RemoteException e){
+
+                    e.printStackTrace();
                     // Don't draw the player that we can't connect
                     break;
-                }
+                }*/
             }
         }
         }catch(NullPointerException e){

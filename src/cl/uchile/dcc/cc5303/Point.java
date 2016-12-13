@@ -12,27 +12,27 @@ public class Point implements Serializable {
 
     public static final int dHip = 4;
 
-    public Point(int x, int y) throws RemoteException{
+    public Point(int x, int y){
         this.x = x;
         this.y = y;
         this.visible = true;
     }
 
-    public Point(int x, int y, boolean visibility) throws RemoteException{
+    public Point(int x, int y, boolean visibility){
         this.x = x;
         this.y = y;
         this.visible = visibility;
     }
 
-    public int getX() throws RemoteException {
+    public int getX() {
         return x;
     }
 
-    public int getY() throws RemoteException {
+    public int getY() {
         return y;
     }
 
-    public boolean getVisible() throws RemoteException {
+    public boolean getVisible()  {
         return visible;
     }
 

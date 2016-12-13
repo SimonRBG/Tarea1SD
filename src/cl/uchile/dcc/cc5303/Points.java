@@ -97,14 +97,16 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
 
-    public void addPoint(Point po, int i) throws RemoteException{
+    public boolean addPoint(Point po, int i) throws RemoteException{
         try {
             if (po == null)
-                return;
+                return false;
             // If the point doesn't choc with another one
             synchronized (mutex2) {
                 if (check(po)) {
                     list[i].add(po);
+                    notifyOperation("new Point Added" + po.getX() + ", " + po.getY() + ", " + po.getVisible() + ". id: " + i);
+                    return true;
                 } else {
                     // Clear all the snake, save tha it lost and telling to the other to update their score
                     list[i].clear();
@@ -116,15 +118,17 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                         notifyOperation("all Lostttt");
                         //TODO borrar todo y empezar de nuevo
                     }
+                    return false;
                 }
             }
 
-            notifyOperation("new Point Added" + po.getX() + ", " + po.getY() + ", " + po.getVisible() + ". id: " + i);
+
         }catch(NullPointerException e){
             System.out.println(list);
             System.out.println(list[i]);
             System.out.println("NPE en Points");
             e.printStackTrace();
+            return false;
         }
     }
     public void setWaitingResponse(boolean val) throws RemoteException {
@@ -178,18 +182,18 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 }
                 //Check other points
                 while (it.hasNext()) {
-                    try {
+                    //try {
                         Point p2 = (Point)it.next();
                         if (abs(px - p2.getX()) < Point.dHip / 3 * 2 && abs(py - p2.getY()) < Point.dHip / 3 * 2 && (p2.getVisible() == pv && pv)) {
                             return false;
                         }
-                    } catch (ConnectException e) {
+                    /*} catch (ConnectException e) {
                         // Free a space for new player
-                        //System.out.println("check and quit");
+                        System.out.println("check and quit!!!!!!!!!!!!!");
                         this.setQuit(i);
                         // Don't draw the player that we can't connect
                         break;
-                    }
+                    }*/
                     it.remove();
                 }
             }
@@ -311,11 +315,16 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
     public boolean gamePaused() throws RemoteException {
-        return gamePaused;
+        synchronized (mutex2) {
+            return gamePaused;
+        }
     }
 
-    public void setPause() throws RemoteException {
-        this.gamePaused = !this.gamePaused;
+    public boolean setPause() throws RemoteException {
+        synchronized (mutex2) {
+            this.gamePaused = !this.gamePaused;
+            return this.gamePaused;
+        }
     }
 
 

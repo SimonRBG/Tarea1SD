@@ -23,7 +23,7 @@ public interface IPoints extends Remote{
 
     public boolean getWaitingResponse() throws RemoteException;
 
-    public  void addPoint(Point po, int i) throws RemoteException;
+    public  boolean addPoint(Point po, int i) throws RemoteException;
 
     public LinkedHashSet<Point>[] getList() throws RemoteException;
 
@@ -53,6 +53,6 @@ public interface IPoints extends Remote{
 
     public boolean gamePaused() throws RemoteException;
 
-    public void setPause() throws RemoteException;
+    public boolean setPause() throws RemoteException;
 }
 
