@@ -99,28 +99,37 @@ public class Server extends Thread{
                 int o = 0;
 
                 // Case in which they all wait for begining other game
-                if (points.getWaitingResponse()) {
-                    while (o < points.getNumPlayers()) {
-                        if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0) {
-                            //System.out.println("waiting response and quit"+ o);
-                            points.setQuit(o);
-                        }
-                        old_values.set(o, points.getUpdateValue(o));
-                        o++;
-                    }
-                }
 
-                // Case in which some of the loosers are waiting for the game to end
-                if (points.getSomeOneWaiiting()) {
-                    while (o < points.getNumPlayers()) {
-                        System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
-                        // If there is not more points for a given player and that player doesn't lost : he has quit the game
-                        if (old_size[o] == points.getList()[o].size() && !points.lost(o)){
-                            //System.out.println("waiting response and quit 2222");
-                            points.setQuit(o);
+                synchronized (((Points)points).mutex2){
+                    if(!points.gamePaused()) {/*check this only if not in pause*/
+                        if (points.getWaitingResponse()) {
+                            while (o < points.getNumPlayers()) {
+                                if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0) {
+                                    //System.out.println("waiting response and quit"+ o);
+                                    points.setQuit(o);
+                                }
+                                old_values.set(o, points.getUpdateValue(o));
+                                o++;
+                            }
+                        } else {
+
+                            // Case in which some of the loosers are waiting for the game to end
+                            if (points.getSomeOneWaiiting() || points.allPlayersReady()) {
+                                while (o < points.getNumPlayers()) {
+                                    System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
+                                    // If there is not more points for a given player and that player doesn't lost : he has quit the game
+                                    int i = 0;
+                                    while (old_size[o] == points.getList()[o].size() && !points.lost(o)) {
+                                        if(i>4)/*check 4 times before says its disconnected*/
+                                            points.setQuit(o);
+                                        i++;
+                                        //System.out.println("waiting response and quit 2222");
+                                    }
+                                    old_size[o] = points.getList()[o].size();
+                                    o++;
+                                }
+                            }
                         }
-                        old_size[o] =points.getList()[o].size();
-                        o++;
                     }
                 }
 
