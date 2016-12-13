@@ -35,52 +35,58 @@ public class Client extends Thread{
     private Board tablero;
     private Player player;
 
-    private int id;
+    private int id = -1;
     private String url_server, url_coordinator;
 
     public Client(String url_c) {
-    	this.url_coordinator = url_c;
-        this.url_server=url_c;
-        try {
-	    w = Server.w;
-	    h = Server.h;
-            keys = new boolean[KeyEvent.KEY_LAST];
-            frame = new JFrame(TITLE);
-            frame.setVisible(true);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	initializeClient(url_c);
+    }
 
-            synchronized (comm.mutex) {
-                tablero = new Board(w, h, Point.dHip);
-            }
-            frame.add(tablero);
-            tablero.setSize(w, h);
+	public Client(String url_c, int id) {
+		this.id=id;
+		initializeClient(url_c);
+	}
+    private void initializeClient(String url_c){
+		this.url_coordinator = url_c;
+		this.url_server=url_c;
+		try {
+			w = Server.w;
+			h = Server.h;
+			keys = new boolean[KeyEvent.KEY_LAST];
+			frame = new JFrame(TITLE);
+			frame.setVisible(true);
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			synchronized (comm.mutex) {
+				tablero = new Board(w, h, Point.dHip);
+			}
+			frame.add(tablero);
+			tablero.setSize(w, h);
+			frame.pack();
+			frame.addKeyListener(new KeyListener() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+				}
 
+				@Override
+				public void keyPressed(KeyEvent e) {
+					keys[e.getKeyCode()] = true;
+				}
 
-            frame.pack();
-            frame.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-                }
+				@Override
+				public void keyReleased(KeyEvent e) {
+					keys[e.getKeyCode()] = false;
+				}
+			});
 
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    keys[e.getKeyCode()] = true;
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-                    keys[e.getKeyCode()] = false;
-                }
-            });
-
-        }  catch (Exception e) {
-            e.printStackTrace();
-        }
+		}  catch (Exception e) {
+			e.printStackTrace();
+		}
 		String ip = Util.getIp();
 		System.out.println("my IP: "+ ip);
 		String hostname = ip;
 		System.setProperty("java.rmi.server.hostname", hostname);
-    }
+
+	}
 
 	public void sleep(){
 		try {
@@ -220,6 +226,7 @@ public class Client extends Thread{
 				try {
 					checkMigration();
 					this.tablero.numplayers = remotePoints.getNumPlayers();
+					this.tablero.looses = remotePoints.getLooses();
 				} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 					this.waitRecuperation();
 					return;
@@ -233,7 +240,22 @@ public class Client extends Thread{
 				synchronized (comm.mutex) {
                     checkMigration();
 					try {
-						id = remotePoints.getId();
+						if(id ==-1){
+							id = remotePoints.getId();
+						}else{
+							id = remotePoints.getId(id);
+							if(!remotePoints.allLost() && remotePoints.getList()[id].size()>0 ) {
+								player = new Player((Point)remotePoints.getList()[id].toArray()[remotePoints.getList()[id].size()-1],id);
+								remotePoints.setReady(id,true,false);
+								player.ended = false;
+								tablero.looses[id] = false;
+							}else {
+									remotePoints.setReady(id, true, true);
+									//player.ended = true;
+									tablero.looses[id] = true;
+							}
+						}
+
 						tablero.id = id;
 						System.out.println("ID: " + id);
 					} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
@@ -263,8 +285,8 @@ public class Client extends Thread{
             while(keepPlaying){
 				int frames = 2;
 				int skipFrames = 0;
+				random = new Random();
 				if (player == null) {
-					random = new Random();
 					int posx = random.nextInt(w - margin_Border - w / 4) + w / 4 + margin_Border;
 					int posy = random.nextInt(h);
 					System.out.println(posx + " - " + posy);
@@ -323,6 +345,7 @@ public class Client extends Thread{
 					}
 				}
 			    while (!allLost) {
+
 			        // Controls
 			        if(!player.ended){
 						if (keys[KeyEvent.VK_UP]) {
@@ -354,7 +377,7 @@ public class Client extends Thread{
 								checkMigration();
 								try {
 									//System.out.println("client press Q 1");
-									remotePoints.setQuit(id);
+									remotePoints.setQuit(id, true);
 								} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 									this.waitRecuperation();
 									continue kp;
@@ -395,6 +418,7 @@ public class Client extends Thread{
                                 checkMigration();
 								try {
 									boolean aux = remotePoints.addPoint(new_point, id);
+									tablero.looses=remotePoints.getLooses();
 									System.out.println(aux);
 								} catch (ConnectException | java.rmi.UnmarshalException | ConnectIOException e){
 									this.waitRecuperation();
@@ -452,6 +476,7 @@ public class Client extends Thread{
                         checkMigration();
 						try {
 							player.ended = remotePoints.lost(id);
+							this.tablero.looses = remotePoints.getLooses();
 							System.out.println("player Ended: "+ remotePoints.lost(id));
 						} catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 							this.waitRecuperation();
@@ -564,7 +589,7 @@ public class Client extends Thread{
 							try {
 								//ready=true;
 								//System.out.println("Client press q 2");
-								remotePoints.setQuit(id);
+								remotePoints.setQuit(id,true);
 							}
 							catch (ConnectException | ConnectIOException | java.rmi.UnmarshalException e){
 								this.waitRecuperation();

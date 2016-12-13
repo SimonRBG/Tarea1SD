@@ -57,7 +57,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue ) throws RemoteException{
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue, boolean gamePaused ) throws RemoteException{
         synchronized (mutex2) {
             this.allLost = allLost;
             this.list = l;
@@ -70,6 +70,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             this.updateValue = updateValue;
             this.waiting = waiting;
             this.someOneWaiting = someOneWaiting;
+            this.gamePaused = gamePaused;
 
         }
     }
@@ -105,6 +106,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             synchronized (mutex2) {
                 if (check(po)) {
                     list[i].add(po);
+                    looses[i]=false;
                     notifyOperation("new Point Added" + po.getX() + ", " + po.getY() + ", " + po.getVisible() + ". id: " + i);
                     return true;
                 } else {
@@ -153,6 +155,11 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
     public boolean allLost() throws RemoteException{
         synchronized (mutex2) {
+            if(allLost){
+                for(int j = 0; j< numplayers;j++){
+                    list[j].clear();
+                }
+            }
             return this.allLost;
         }
 
@@ -161,8 +168,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
     private boolean checkAllPlayers(){
         synchronized (mutex2) {
             for (int i = 0; i < this.numplayers; i++) {
-                if (!this.looses[i])
+                if (!this.looses[i]){
                     return false;
+                }
             }
             return true;
         }
@@ -249,6 +257,29 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
 
+    public int getId(int id) throws RemoteException{
+        synchronized (mutex2) {
+            try{
+                ids.remove(id);
+                notifyOperation("new id " + id);
+                //TODO recover variables from points(?)
+                //scores[id] = 0;
+                this.ready[id] = true;
+                if(list[id].size()>0){
+                    this.looses[id]=false;
+                }else{//TODO fix
+                    this.looses[id]=true;
+                }
+                //this.looses[id] = false;
+                //System.out.println("ids:" + ids);
+                return id;
+            }catch(ArrayIndexOutOfBoundsException e){
+                System.out.println("Id already taken: "+ id);
+                return getId();
+            }
+        }
+    }
+
 
     public boolean allPlayersReady() throws RemoteException{
         synchronized (mutex2) {
@@ -270,14 +301,35 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
         }
     }
 
-    public void setQuit(int id) throws  RemoteException{
+    public boolean[] getLooses() throws RemoteException{
+        synchronized (mutex2){
+            return this.looses;
+        }
+    }
+
+    public void notLost(int id) throws RemoteException{
+        synchronized (mutex2){
+            looses[id]=false;
+        }
+    }
+
+    public void setQuit(int id, boolean voluntary) throws  RemoteException{
         synchronized (mutex2) {
-            list[id].clear();
+            if(voluntary){
+                list[id].clear();
+                this.scores[id] = -1;
+                this.ready[id] = true;
+                this.someOneQuit = true;
+                notify_score(id);
+            }
             this.looses[id] = true;
 
-            notify_score(id);
+
             if (checkAllPlayers()) {
                 this.allLost = true;
+                for(int i = 0; i< numplayers;i++){
+                    list[i].clear();
+                }
                 notifyOperation("all Lost");
             }
             // Id available & reinitilize the score
@@ -285,9 +337,7 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 ids.push(new Integer(id));
             }
 
-            this.scores[id] = -1;
-            this.ready[id] = true;
-            this.someOneQuit = true;
+
             notifyOperation("player " + id + " quit!!");
         }
     }
@@ -407,6 +457,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
             String ssomeOneWaiting = someOneWaiting?"1":"0";
             sb.append("SomeOneWaiting:").append(ssomeOneWaiting);
 
+            sb.append(";");
+            String sgamePaused = gamePaused?"1":"0";
+            sb.append("GamePaused:").append(sgamePaused);
 
 
             //sb.append(";");
@@ -540,9 +593,13 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
                 String[] ssuv = sUpdateValue.split(",");
                 for(int i = 0; i<ssuv.length; i++){
                     String[] sssuv = ssuv[i].split("=");
-                    Integer k = new Integer(Integer.parseInt(sssuv[0].trim()));
-                    Integer v = new Integer(Integer.parseInt(sssuv[1].trim()));
-                    updateValue.put(k,v);
+                    try {
+                        Integer k = new Integer(Integer.parseInt(sssuv[0].trim()));
+                        Integer v = new Integer(Integer.parseInt(sssuv[1].trim()));
+                        updateValue.put(k, v);
+                    }catch(NumberFormatException e){
+                        System.out.println("k,v number format Exception: "+ sUpdateValue);
+                    }
                 }
 
                 System.out.println("UV: "+ updateValue);
@@ -552,6 +609,9 @@ public class Points extends UnicastRemoteObject  implements IPoints, Serializabl
 
                 someOneWaiting = (Integer.parseInt(sa[10].split(":")[1]) == 0) ? false : true;
                 System.out.println("someoneWaiting:"+someOneWaiting);
+
+                gamePaused = (Integer.parseInt(sa[11].split(":")[1]) == 0) ? false : true;
+                System.out.println("GamePaused:"+gamePaused);
 
             } catch (Exception e) {
                 e.printStackTrace();

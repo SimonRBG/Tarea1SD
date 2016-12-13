@@ -101,12 +101,13 @@ public class Server extends Thread{
                 // Case in which they all wait for begining other game
 
                 synchronized (((Points)points).mutex2){
-                    if(!points.gamePaused()) {/*check this only if not in pause*/
+                    if(!points.gamePaused() ) {/*check this only if not in pause*/
                         if (points.getWaitingResponse()) {
                             while (o < points.getNumPlayers()) {
                                 if (old_values.get(o) == points.getUpdateValue(o) && points.getUpdateValue(o) != 0) {
                                     //System.out.println("waiting response and quit"+ o);
-                                    points.setQuit(o);
+                                    System.out.println("QuitThere!!");
+                                    points.setQuit(o,false);
                                 }
                                 old_values.set(o, points.getUpdateValue(o));
                                 o++;
@@ -114,15 +115,19 @@ public class Server extends Thread{
                         } else {
 
                             // Case in which some of the loosers are waiting for the game to end
-                            if (points.getSomeOneWaiiting() || points.allPlayersReady()) {
+                            if (points.allPlayersReady()) {
                                 while (o < points.getNumPlayers()) {
                                     System.out.println(String.valueOf(old_size[o] + " - " + points.getList()[o].size()));
                                     // If there is not more points for a given player and that player doesn't lost : he has quit the game
                                     int i = 0;
                                     while (old_size[o] == points.getList()[o].size() && !points.lost(o)) {
-                                        if(i>4)/*check 4 times before says its disconnected*/
-                                            points.setQuit(o);
-                                        i++;
+                                        if( !points.gamePaused()) {
+                                            if (i > 4) {/*check 4 times before says its disconnected*/
+                                                System.out.println("QuitHere!!");
+                                                points.setQuit(o,false);
+                                            }
+                                            i++;
+                                        }
                                         //System.out.println("waiting response and quit 2222");
                                     }
                                     old_size[o] = points.getList()[o].size();
@@ -149,7 +154,7 @@ public class Server extends Thread{
                             String url = c.getActual_url_server();
                             System.out.println(url);
                             IPoints p = (IPoints) Naming.lookup(url);
-                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers, mypoints.someOneQuit, mypoints.waiting, mypoints.someOneWaiting, mypoints.updateValue);
+                            p.SetPoints(mypoints.scores, mypoints.looses, mypoints.allLost, mypoints.ready, mypoints.list, mypoints.ids, mypoints.numplayers, mypoints.someOneQuit, mypoints.waiting, mypoints.someOneWaiting, mypoints.updateValue, mypoints.gamePaused);
                             Naming.unbind(url_server);
                             points = new Points(num_players, w, h);
                             Naming.rebind(url_server, points);
@@ -201,6 +206,7 @@ public class Server extends Thread{
                 ipc = args[i+1];
             }
         }
+
 
         //s.start();
         Server s = new Server(n, pc, ipc, p);

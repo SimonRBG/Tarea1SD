@@ -26,6 +26,7 @@ public class Board extends Canvas{
     public Graphics buffer;
     public Graphics buffer_score;
     public int dHip;
+    public boolean[]looses;
 
     public Board(int width, int height, int dHip) {
         this.width = width;
@@ -42,6 +43,7 @@ public class Board extends Canvas{
         colors[4] = Color.cyan;
         this.dHip = dHip;
         serverDown = false;
+
 
     }
 
@@ -100,18 +102,26 @@ public class Board extends Canvas{
         drawScores();
 
         if(points==null) {
+            System.out.println("Points null");
             return;
         }
         try{
         for(int j = 0; j < numplayers; j++) {
+            System.out.println("drawing points of player "+j);
             buffer.setColor(colors[j]);
             LinkedHashSet<Point> l = points[j];
+            if(looses[j]){
+                continue;
+            }
             Iterator itr = l.iterator();
             while (itr.hasNext()) {
                 Point p = (Point) itr.next();
                 //try{
-                    if (p.getVisible())
+                    if (p.getVisible()) {
                         buffer.fillOval(p.getX() - dHip / 2, p.getY() - dHip / 2, dHip, dHip);
+                        System.out.println("Draw Point");
+                    }
+
                 /*}catch (RemoteException e){
 
                     e.printStackTrace();

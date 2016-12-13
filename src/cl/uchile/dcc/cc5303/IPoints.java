@@ -11,7 +11,7 @@ import java.util.Stack;
 
 public interface IPoints extends Remote{
 
-    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue ) throws RemoteException;
+    public void SetPoints(int[] scores, boolean[] looses, boolean allLost, boolean[] ready,LinkedHashSet<Point>[] l, Stack ids, int numplayers, boolean someOneQuit, boolean waiting, boolean someOneWaiting, HashMap<Integer, Integer> updateValue, boolean gamePaused ) throws RemoteException;
 
     public Points getPoints() throws RemoteException;
 
@@ -29,9 +29,15 @@ public interface IPoints extends Remote{
 
     public int getId() throws RemoteException;
 
+    public int getId(int id) throws RemoteException;
+
     public int getScore(int id) throws RemoteException;
 
     public int[] getScores() throws RemoteException;
+
+    public boolean[] getLooses() throws RemoteException;
+
+    public void notLost(int id) throws RemoteException;
 
     public int getNumPlayers() throws RemoteException;
 
@@ -43,7 +49,7 @@ public interface IPoints extends Remote{
 	
     public void setReady(int id, boolean r, boolean l) throws RemoteException;
 
-    public void setQuit(int id) throws  RemoteException;
+    public void setQuit(int id, boolean voluntary) throws  RemoteException;
 
     public void setSomeOneWaiting(boolean value) throws RemoteException;
 
